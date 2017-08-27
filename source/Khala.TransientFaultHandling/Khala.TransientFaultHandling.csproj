@@ -46,9 +46,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransientFaultHandling\ConstantRetryIntervalStrategy.cs" />
     <Compile Include="TransientFaultHandling\DelegatingTransientFaultDetectionStrategy.cs" />
+    <Compile Include="TransientFaultHandling\DelegatingTransientFaultDetectionStrategy{T}.cs" />
     <Compile Include="TransientFaultHandling\LinearRetryIntervalStrategy.cs" />
     <Compile Include="TransientFaultHandling\RetryIntervalStrategy.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy.cs" />
+    <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy{T}.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Khala.TransientFaultHandling.ruleset" />

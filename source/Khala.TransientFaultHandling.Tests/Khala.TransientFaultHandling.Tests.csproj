@@ -76,9 +76,11 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransientFaultHandling\ConstantRetryIntervalStrategy_specs.cs" />
+    <Compile Include="TransientFaultHandling\DelegatingTransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\DelegatingTransientFaultDetectionStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\LinearRetryIntervalStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryIntervalStrategy_specs.cs" />
+    <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy_specs.cs" />
   </ItemGroup>
   <ItemGroup>
