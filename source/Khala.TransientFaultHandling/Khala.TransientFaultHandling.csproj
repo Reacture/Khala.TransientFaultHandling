@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransientFaultHandling\ConstantIntervalRetryStrategy.cs" />
+    <Compile Include="TransientFaultHandling\RetryIntervalStrategy.cs" />
     <Compile Include="TransientFaultHandling\RetryStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
