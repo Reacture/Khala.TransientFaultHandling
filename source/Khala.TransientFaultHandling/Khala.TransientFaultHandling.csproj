@@ -50,6 +50,7 @@
     <Compile Include="TransientFaultHandling\DelegatingTransientFaultDetectionStrategy{T}.cs" />
     <Compile Include="TransientFaultHandling\LinearRetryIntervalStrategy.cs" />
     <Compile Include="TransientFaultHandling\RetryIntervalStrategy.cs" />
+    <Compile Include="TransientFaultHandling\RetryPolicy.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy{T}.cs" />
   </ItemGroup>
