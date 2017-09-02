@@ -84,6 +84,7 @@
     <Compile Include="TransientFaultHandling\DelegatingTransientFaultDetectionStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\LinearRetryIntervalStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryIntervalStrategy_specs.cs" />
+    <Compile Include="TransientFaultHandling\RetryPolicyT_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryPolicy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy_specs.cs" />
