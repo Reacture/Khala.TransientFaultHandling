@@ -12,7 +12,7 @@
             _func = func ?? throw new ArgumentNullException(nameof(func));
         }
 
-        protected override TimeSpan GetIntervalFromTick(int tick)
+        protected override TimeSpan GetIntervalFromZeroBasedTick(int tick)
         {
             return _func.Invoke(tick);
         }

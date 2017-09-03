@@ -36,7 +36,7 @@
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        public void GetIntervalFromTick_returns_Interval_always(bool zeroRetried)
+        public void GetIntervalFromZeroBasedTick_returns_Interval_always(bool zeroRetried)
         {
             var fixture = new Fixture();
             var interval = fixture.Create<TimeSpan>();

@@ -28,7 +28,7 @@
             var retried = fixture.Create<int>();
             var expected = fixture.Create<TimeSpan>();
             var functionProvider = Mock.Of<IFunctionProvider>(
-                x => x.Func<int, TimeSpan>(retried + 1) == expected);
+                x => x.Func<int, TimeSpan>(retried) == expected);
             var sut = new DelegatingRetryIntervalStrategy(functionProvider.Func<int, TimeSpan>, false);
 
             TimeSpan actual = sut.GetInterval(retried);

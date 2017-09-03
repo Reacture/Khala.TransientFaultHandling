@@ -56,7 +56,7 @@
         }
 
         [TestMethod]
-        public void GetIntervalFromTick_returns_linear_growth_result()
+        public void GetIntervalFromZeroBasedTick_returns_linear_growth_result()
         {
             var fixture = new Fixture();
             var initialInterval = fixture.Create<TimeSpan>();
@@ -71,7 +71,7 @@
         }
 
         [TestMethod]
-        public void GetIntervalFromTick_return_value_does_not_exceed_MaximumInterval()
+        public void GetIntervalFromZeroBasedTick_return_value_does_not_exceed_MaximumInterval()
         {
             var initialInterval = TimeSpan.Zero;
             var increment = TimeSpan.FromTicks(10);

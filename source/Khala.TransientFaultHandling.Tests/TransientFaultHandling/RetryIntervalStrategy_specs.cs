@@ -53,7 +53,7 @@
         }
 
         [TestMethod]
-        public void given_true_ImmediateFirstRetry_GetInterval_relays_to_GetIntervalFromTick_with_retried()
+        public void given_true_ImmediateFirstRetry_GetInterval_relays_to_GetIntervalFromZeroBasedTick_with_retried_minus_one()
         {
             const bool ImmediateFirstRetry = true;
             var mock = new Mock<RetryIntervalStrategy>(ImmediateFirstRetry);
@@ -61,16 +61,16 @@
             var fixture = new Fixture();
             var retried = fixture.Create<int>();
             var expected = fixture.Create<TimeSpan>();
-            mock.Protected().Setup<TimeSpan>("GetIntervalFromTick", retried).Returns(expected);
+            mock.Protected().Setup<TimeSpan>("GetIntervalFromZeroBasedTick", retried - 1).Returns(expected);
 
             TimeSpan actual = sut.GetInterval(retried);
 
             actual.Should().Be(expected);
-            mock.Protected().Verify<TimeSpan>("GetIntervalFromTick", Times.Once(), retried);
+            mock.Protected().Verify<TimeSpan>("GetIntervalFromZeroBasedTick", Times.Once(), ItExpr.IsAny<int>());
         }
 
         [TestMethod]
-        public void given_true_ImmediateFirstRetry_and_zero_retried_GetInterval_does_not_call_GetIntervalFromTick()
+        public void given_true_ImmediateFirstRetry_and_zero_retried_GetInterval_does_not_call_GetIntervalFromZeroBasedTick()
         {
             const bool ImmediateFirstRetry = true;
             var mock = new Mock<RetryIntervalStrategy>(ImmediateFirstRetry);
@@ -79,11 +79,11 @@
 
             sut.GetInterval(retried);
 
-            mock.Protected().Verify<TimeSpan>("GetIntervalFromTick", Times.Never(), ItExpr.IsAny<int>());
+            mock.Protected().Verify<TimeSpan>("GetIntervalFromZeroBasedTick", Times.Never(), ItExpr.IsAny<int>());
         }
 
         [TestMethod]
-        public void given_false_ImmediateFirstRetry_GetInterval_relays_to_GetIntervalFromTick_with_retried_plus_one()
+        public void given_false_ImmediateFirstRetry_GetInterval_relays_to_GetIntervalFromZeroBasedTick_with_retried()
         {
             const bool ImmediateFirstRetry = false;
             var mock = new Mock<RetryIntervalStrategy>(ImmediateFirstRetry);
@@ -91,12 +91,12 @@
             var fixture = new Fixture();
             var retried = fixture.Create<int>();
             var expected = fixture.Create<TimeSpan>();
-            mock.Protected().Setup<TimeSpan>("GetIntervalFromTick", retried + 1).Returns(expected);
+            mock.Protected().Setup<TimeSpan>("GetIntervalFromZeroBasedTick", retried).Returns(expected);
 
             TimeSpan actual = sut.GetInterval(retried);
 
             actual.Should().Be(expected);
-            mock.Protected().Verify<TimeSpan>("GetIntervalFromTick", Times.Once(), ItExpr.IsAny<int>());
+            mock.Protected().Verify<TimeSpan>("GetIntervalFromZeroBasedTick", Times.Once(), ItExpr.IsAny<int>());
         }
 
         [TestMethod]

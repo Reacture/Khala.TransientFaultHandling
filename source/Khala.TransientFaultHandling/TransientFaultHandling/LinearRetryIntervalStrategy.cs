@@ -22,10 +22,10 @@
 
         public TimeSpan MaximumInterval { get; }
 
-        protected override TimeSpan GetIntervalFromTick(int tick) =>
+        protected override TimeSpan GetIntervalFromZeroBasedTick(int tick) =>
             TimeSpan.FromTicks(
                 Math.Min(
                     MaximumInterval.Ticks,
-                    InitialInterval.Ticks + (Increment.Ticks * (tick - 1))));
+                    InitialInterval.Ticks + (Increment.Ticks * tick)));
     }
 }

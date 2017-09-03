@@ -19,10 +19,10 @@
             }
 
             return ImmediateFirstRetry
-                ? (retried == 0 ? TimeSpan.Zero : GetIntervalFromTick(retried))
-                : GetIntervalFromTick(retried + 1);
+                ? (retried == 0 ? TimeSpan.Zero : GetIntervalFromZeroBasedTick(retried - 1))
+                : GetIntervalFromZeroBasedTick(retried);
         }
 
-        protected abstract TimeSpan GetIntervalFromTick(int tick);
+        protected abstract TimeSpan GetIntervalFromZeroBasedTick(int tick);
     }
 }

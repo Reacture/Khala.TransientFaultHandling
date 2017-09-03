@@ -202,7 +202,7 @@
             var sut = new RetryPolicy<Result>(
                 maximumRetryCount,
                 new DelegatingTransientFaultDetectionStrategy<Result>(x => true, x => x is TransientResult),
-                new DelegatingRetryIntervalStrategy(t => delays[t - 1], false));
+                new DelegatingRetryIntervalStrategy(t => delays[t], false));
 
             // Act
             await sut.Run(spy.Operation, CancellationToken.None);

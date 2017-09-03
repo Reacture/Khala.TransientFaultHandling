@@ -12,6 +12,6 @@
 
         public TimeSpan Interval { get; }
 
-        protected override TimeSpan GetIntervalFromTick(int tick) => Interval;
+        protected override TimeSpan GetIntervalFromZeroBasedTick(int tick) => Interval;
     }
 }
