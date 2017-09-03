@@ -188,6 +188,35 @@
             oper.InvocationCount.Should().Be(1);
         }
 
+        [TestMethod]
+        public async Task Run_delays_before_retry()
+        {
+            // Arrange
+            var generator = new Generator<int>(new Fixture());
+            var maximumRetryCount = generator.First(x => x < 10);
+            TimeSpan[] delays = Enumerable
+                .Range(0, maximumRetryCount)
+                .Select(_ => TimeSpan.FromMilliseconds(generator.First()))
+                .ToArray();
+            var spy = new OperationSpy(transientCount: maximumRetryCount - 1);
+            var sut = new RetryPolicy<Result>(
+                maximumRetryCount,
+                new DelegatingTransientFaultDetectionStrategy<Result>(x => true, x => x is TransientResult),
+                new DelegatingRetryIntervalStrategy(t => delays[t - 1], false));
+
+            // Act
+            await sut.Run(spy.Operation, CancellationToken.None);
+
+            // Assert
+            for (int i = 0; i < spy.Laps.Count - 1; i++)
+            {
+                TimeSpan actual = spy.Laps[i + 1] - spy.Laps[i];
+                TimeSpan expected = delays[i];
+                actual.Should().BeGreaterOrEqualTo(expected);
+                actual.Should().BeCloseTo(expected, precision: 20);
+            }
+        }
+
         public class Result
         {
         }
@@ -259,6 +288,46 @@
                 }
 
                 return Task.FromResult(_result);
+            }
+        }
+
+        public class OperationSpy
+        {
+            private readonly List<DateTime> _laps;
+            private readonly int _transientCount;
+
+            public OperationSpy(int transientCount)
+            {
+                _laps = new List<DateTime>();
+                _transientCount = transientCount;
+            }
+
+            public IReadOnlyList<DateTime> Laps => _laps;
+
+            public Task<Result> Operation(CancellationToken cancellationToken)
+            {
+                var now = DateTime.Now;
+
+                try
+                {
+                    if (_laps.Count < _transientCount)
+                    {
+                        if (now.Millisecond % 2 == 0)
+                        {
+                            throw new InvalidOperationException();
+                        }
+                        else
+                        {
+                            return Task.FromResult<Result>(new TransientResult());
+                        }
+                    }
+
+                    return Task.FromResult(new Result());
+                }
+                finally
+                {
+                    _laps.Add(now);
+                }
             }
         }
     }
