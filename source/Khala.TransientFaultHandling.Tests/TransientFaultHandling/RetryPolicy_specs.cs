@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -95,7 +94,7 @@
             await sut.Run(oper.Operation, CancellationToken.None);
 
             // Assert
-            oper.InvocationCount.Should().Be(failTimes + 1);
+            oper.Laps.Count.Should().Be(failTimes + 1);
         }
 
         [TestMethod]
@@ -117,7 +116,7 @@
 
             // Assert
             action.ShouldThrow<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
-            oper.InvocationCount.Should().Be(maximumRetryCount + 1);
+            oper.Laps.Count.Should().Be(maximumRetryCount + 1);
         }
 
         [TestMethod]
@@ -137,7 +136,7 @@
 
             // Assert
             action.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
-            oper.InvocationCount.Should().Be(1);
+            oper.Laps.Count.Should().Be(1);
         }
 
         [TestMethod]
@@ -147,50 +146,59 @@
             var generator = new Generator<int>(new Fixture());
             var maximumRetryCount = generator.First(x => x < 10);
             var exceptions = Enumerable.Repeat(new Exception(), maximumRetryCount);
-            TimeSpan[] delays = Enumerable.Range(0, maximumRetryCount).Select(_ => TimeSpan.FromMilliseconds(new Fixture().Create<int>())).ToArray();
-            var oper = new EventualSuccessOperator(exceptions);
+            TimeSpan[] delays = Enumerable
+                .Range(0, maximumRetryCount)
+                .Select(_ => TimeSpan.FromMilliseconds(new Fixture().Create<int>()))
+                .ToArray();
+            var spy = new EventualSuccessOperator(exceptions);
             var sut = new RetryPolicy(
                 maximumRetryCount,
                 new DelegatingTransientFaultDetectionStrategy(x => true),
                 new DelegatingRetryIntervalStrategy(t => delays[t - 1], false));
 
             // Act
-            var stopwatch = Stopwatch.StartNew();
-            await sut.Run(oper.Operation, CancellationToken.None);
-            stopwatch.Stop();
+            await sut.Run(spy.Operation, CancellationToken.None);
 
             // Assert
-            stopwatch.ElapsedTicks.Should().BeGreaterOrEqualTo(delays.Select(x => x.Ticks).Sum());
+            for (int i = 0; i < spy.Laps.Count - 1; i++)
+            {
+                TimeSpan actual = spy.Laps[i + 1] - spy.Laps[i];
+                TimeSpan expected = delays[i];
+                actual.Should().BeGreaterOrEqualTo(expected);
+                actual.Should().BeCloseTo(expected, precision: 20);
+            }
         }
 
         public class EventualSuccessOperator
         {
+            private readonly List<DateTime> _laps;
             private readonly Queue<Exception> _exceptions;
-            private int _invocationCount;
 
             public EventualSuccessOperator(IEnumerable<Exception> exceptions)
             {
+                _laps = new List<DateTime>();
                 _exceptions = new Queue<Exception>(exceptions);
-                _invocationCount = 0;
             }
 
-            public int InvocationCount => _invocationCount;
+            public IReadOnlyList<DateTime> Laps => _laps;
 
             public Task Operation(CancellationToken cancellationToken)
             {
+                var now = DateTime.Now;
+
                 try
                 {
                     if (_exceptions.Any())
                     {
                         throw _exceptions.Dequeue();
                     }
+
+                    return Task.CompletedTask;
                 }
                 finally
                 {
-                    _invocationCount++;
+                    _laps.Add(now);
                 }
-
-                return Task.CompletedTask;
             }
         }
     }
