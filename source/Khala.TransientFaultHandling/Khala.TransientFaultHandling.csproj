@@ -54,6 +54,7 @@
     <Compile Include="TransientFaultHandling\RetryPolicy{T}.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy{T}.cs" />
+    <Compile Include="TransientFaultHandling\TransientDefaultDetectionStrategy{T}.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Khala.TransientFaultHandling.ruleset" />

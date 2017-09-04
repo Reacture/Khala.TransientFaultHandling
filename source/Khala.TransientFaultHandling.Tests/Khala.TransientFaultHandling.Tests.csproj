@@ -88,6 +88,7 @@
     <Compile Include="TransientFaultHandling\RetryPolicy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy_specs.cs" />
+    <Compile Include="TransientFaultHandling\TransientDefaultDetectionStrategyT_specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
