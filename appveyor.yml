@@ -1,0 +1,14 @@
+version: 0.1.{build}
+image: Visual Studio 2017
+configuration: Release
+before_build:
+- cmd: nuget restore source\Khala.TransientFaultHandling.sln
+build:
+  verbosity: minimal
+after_build:
+- cmd: >-
+    nuget pack nuget\Khala.TransientFaultHandling.nuspec
+test:
+  assemblies: '**\*.tests.dll'
+artifacts:
+- path: Khala.TransientFaultHandling**.nupkg
