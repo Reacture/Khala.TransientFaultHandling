@@ -43,7 +43,7 @@
                 catch (Exception exception)
                 when (_transientFaultDetectionStrategy.IsTransientException(exception) && retryCount < _maximumRetryCount)
                 {
-                    await Task.Delay(_retryIntervalStrategy.GetInterval(retryCount));
+                    await Task.Delay(_retryIntervalStrategy.GetInterval(retryCount), cancellationToken);
                     retryCount++;
                     goto Try;
                 }

@@ -87,7 +87,7 @@
             var oper = new EventualSuccessOperator(Enumerable.Repeat(new Exception(), failTimes));
             var sut = new RetryPolicy(
                 maximumRetryCount,
-                new DelegatingTransientFaultDetectionStrategy(x => true),
+                new TransientFaultDetectionStrategy(),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
@@ -108,7 +108,7 @@
             var oper = new EventualSuccessOperator(exceptions);
             var sut = new RetryPolicy(
                 maximumRetryCount,
-                new DelegatingTransientFaultDetectionStrategy(x => true),
+                new TransientFaultDetectionStrategy(),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
@@ -153,7 +153,7 @@
             var spy = new EventualSuccessOperator(exceptions);
             var sut = new RetryPolicy(
                 maximumRetryCount,
-                new DelegatingTransientFaultDetectionStrategy(x => true),
+                new TransientFaultDetectionStrategy(),
                 new DelegatingRetryIntervalStrategy(t => delays[t], false));
 
             // Act

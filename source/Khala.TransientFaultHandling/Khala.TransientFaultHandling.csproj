@@ -54,6 +54,7 @@
     <Compile Include="TransientFaultHandling\TransientDefaultDetectionStrategy{T}.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy{T}.cs" />
+    <Compile Include="TransientFaultHandling\TransientFaultHandlingExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>
