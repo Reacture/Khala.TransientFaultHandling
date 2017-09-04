@@ -17,6 +17,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\source\Khala.TransientFaultHandling\bin\Release\Khala.TransientFaultHandling.dll" target="lib\net45\Khala.TransientFaultHandling.dll" />
+    <file src="..\source\Khala.TransientFaultHandling\bin\Release\Khala.TransientFaultHandling.dll" target="lib\netstandard1.1\Khala.TransientFaultHandling.dll" />
   </files>
 </package>

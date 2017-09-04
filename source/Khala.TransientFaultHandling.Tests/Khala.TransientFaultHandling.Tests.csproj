@@ -98,14 +98,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Khala.TransientFaultHandling\Khala.TransientFaultHandling.csproj">
-      <Project>{B2AAD428-5B56-465B-95B0-F038DD6C0EBB}</Project>
-      <Name>Khala.TransientFaultHandling</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Khala.TransientFaultHandling\Khala.TransientFaultHandling.csproj">
+      <Project>{c9471eeb-8098-4d41-848b-5217375d4b1a}</Project>
+      <Name>Khala.TransientFaultHandling</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
