@@ -67,7 +67,7 @@
 
             CancellationToken cancellationToken = default;
             var functionProvider = Mock.Of<IFunctionProvider>(
-                x => x.Func<CancellationToken, Task>(cancellationToken) == Task.CompletedTask);
+                x => x.Func<CancellationToken, Task>(cancellationToken) == Task.FromResult(true));
             Func<CancellationToken, Task> operation = functionProvider.Func<CancellationToken, Task>;
 
             // Act
@@ -193,7 +193,7 @@
                         throw _exceptions.Dequeue();
                     }
 
-                    return Task.CompletedTask;
+                    return Task.FromResult(true);
                 }
                 finally
                 {
