@@ -65,7 +65,7 @@
                 transientFaultDetectionStrategy,
                 retryIntervalStrategy);
 
-            CancellationToken cancellationToken = default;
+            var cancellationToken = default(CancellationToken);
             var functionProvider = Mock.Of<IFunctionProvider>(
                 x => x.Func<CancellationToken, Task>(cancellationToken) == Task.FromResult(true));
             Func<CancellationToken, Task> operation = functionProvider.Func<CancellationToken, Task>;

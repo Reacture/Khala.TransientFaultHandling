@@ -18,7 +18,7 @@
         [TestMethod]
         public void given_default_struct_result_IsTransientResult_returns_true()
         {
-            StructResult result = default;
+            var result = default(StructResult);
             var sut = new TransientDefaultDetectionStrategy<StructResult>();
 
             bool actual = sut.IsTransientResult(result);
@@ -41,7 +41,7 @@
         [TestMethod]
         public void given_default_class_result_IsTransientResult_returns_true()
         {
-            ClassResult result = default;
+            var result = default(ClassResult);
             var sut = new TransientDefaultDetectionStrategy<ClassResult>();
 
             bool actual = sut.IsTransientResult(result);

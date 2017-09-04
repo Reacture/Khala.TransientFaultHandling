@@ -61,7 +61,7 @@
                     result => false),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, false));
 
-            CancellationToken cancellationToken = default;
+            var cancellationToken = default(CancellationToken);
             var expected = new Result();
             var functionProvider = Mock.Of<IFunctionProvider>(
                 x => x.Func<CancellationToken, Task<Result>>(cancellationToken) == Task.FromResult(expected));

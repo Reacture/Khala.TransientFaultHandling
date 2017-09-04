@@ -35,7 +35,7 @@
             async Task<T> Run()
             {
                 int retryCount = 0;
-                T result = default;
+                T result = default(T);
                 Try:
                 try
                 {
