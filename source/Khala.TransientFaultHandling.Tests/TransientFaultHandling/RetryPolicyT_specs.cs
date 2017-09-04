@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using FluentAssertions;
@@ -26,6 +27,33 @@
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var assertion = new GuardClauseAssertion(fixture);
             assertion.Verify(typeof(RetryPolicy<>));
+        }
+
+        [TestMethod]
+        public void constructor_sets_properties_correctly()
+        {
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var maximumRetryCount = fixture.Create<int>();
+            var transientFaultDetectionStrategy = fixture.Create<TransientDefaultDetectionStrategy<Result>>();
+            var retryIntervalStrategy = fixture.Create<RetryIntervalStrategy>();
+
+            var sut = new RetryPolicy<Result>(
+                maximumRetryCount,
+                transientFaultDetectionStrategy,
+                retryIntervalStrategy);
+
+            sut.MaximumRetryCount.Should().Be(maximumRetryCount);
+            sut.TransientFaultDetectionStrategy.Should().BeSameAs(transientFaultDetectionStrategy);
+            sut.RetryIntervalStrategy.Should().BeSameAs(retryIntervalStrategy);
+        }
+
+        [TestMethod]
+        public void sut_is_immutable()
+        {
+            foreach (PropertyInfo property in typeof(RetryPolicy<>).GetProperties())
+            {
+                property.Should().NotBeWritable();
+            }
         }
 
         [TestMethod]
@@ -215,6 +243,46 @@
                 actual.Should().BeGreaterOrEqualTo(expected);
                 actual.Should().BeCloseTo(expected, precision: 20);
             }
+        }
+
+        [TestMethod]
+        public void LinearTransientDefault_assembles_policy_correctly()
+        {
+            var fixture = new Fixture();
+            var maximumRetryCount = fixture.Create<int>();
+            var increment = fixture.Create<TimeSpan>();
+
+            var actual = RetryPolicy<Result>.LinearTransientDefault(maximumRetryCount, increment);
+
+            actual.Should().NotBeNull();
+            actual.MaximumRetryCount.Should().Be(maximumRetryCount);
+            actual.TransientFaultDetectionStrategy.Should().BeOfType<TransientDefaultDetectionStrategy<Result>>();
+            actual.RetryIntervalStrategy.Should().Match<LinearRetryIntervalStrategy>(
+                x =>
+                x.MaximumInterval == TimeSpan.MaxValue &&
+                x.InitialInterval == TimeSpan.Zero &&
+                x.Increment == increment &&
+                x.ImmediateFirstRetry == false);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void ConstantTransientDefault_assembles_policy_correctly(bool immediateFirstRetry)
+        {
+            var fixture = new Fixture();
+            var maximumRetryCount = fixture.Create<int>();
+            var interval = fixture.Create<TimeSpan>();
+
+            var actual = RetryPolicy<Result>.ConstantTransientDefault(maximumRetryCount, interval, immediateFirstRetry);
+
+            actual.Should().NotBeNull();
+            actual.MaximumRetryCount.Should().Be(maximumRetryCount);
+            actual.TransientFaultDetectionStrategy.Should().BeOfType<TransientDefaultDetectionStrategy<Result>>();
+            actual.RetryIntervalStrategy.Should().Match<ConstantRetryIntervalStrategy>(
+                x =>
+                x.Interval == interval &&
+                x.ImmediateFirstRetry == immediateFirstRetry);
         }
 
         public class Result

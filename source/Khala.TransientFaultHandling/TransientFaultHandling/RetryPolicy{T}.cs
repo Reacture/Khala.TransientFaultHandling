@@ -6,10 +6,6 @@
 
     public class RetryPolicy<T>
     {
-        private readonly int _maximumRetryCount;
-        private readonly TransientFaultDetectionStrategy<T> _transientFaultDetectionStrategy;
-        private readonly RetryIntervalStrategy _retryIntervalStrategy;
-
         public RetryPolicy(
             int maximumRetryCount,
             TransientFaultDetectionStrategy<T> transientFaultDetectionStrategy,
@@ -20,9 +16,35 @@
                 throw new ArgumentOutOfRangeException(nameof(maximumRetryCount), "Value cannot be negative.");
             }
 
-            _maximumRetryCount = maximumRetryCount;
-            _transientFaultDetectionStrategy = transientFaultDetectionStrategy ?? throw new ArgumentNullException(nameof(transientFaultDetectionStrategy));
-            _retryIntervalStrategy = retryIntervalStrategy ?? throw new ArgumentNullException(nameof(retryIntervalStrategy));
+            MaximumRetryCount = maximumRetryCount;
+            TransientFaultDetectionStrategy = transientFaultDetectionStrategy ?? throw new ArgumentNullException(nameof(transientFaultDetectionStrategy));
+            RetryIntervalStrategy = retryIntervalStrategy ?? throw new ArgumentNullException(nameof(retryIntervalStrategy));
+        }
+
+        public int MaximumRetryCount { get; }
+
+        public TransientFaultDetectionStrategy<T> TransientFaultDetectionStrategy { get; }
+
+        public RetryIntervalStrategy RetryIntervalStrategy { get; }
+
+        public static RetryPolicy<T> LinearTransientDefault(int maximumRetryCount, TimeSpan increment)
+        {
+            return new RetryPolicy<T>(
+                maximumRetryCount,
+                new TransientDefaultDetectionStrategy<T>(),
+                new LinearRetryIntervalStrategy(
+                    TimeSpan.Zero,
+                    increment,
+                    maximumInterval: TimeSpan.MaxValue,
+                    immediateFirstRetry: false));
+        }
+
+        public static RetryPolicy<T> ConstantTransientDefault(int maximumRetryCount, TimeSpan interval, bool immediateFirstRetry)
+        {
+            return new RetryPolicy<T>(
+                maximumRetryCount,
+                new TransientDefaultDetectionStrategy<T>(),
+                new ConstantRetryIntervalStrategy(interval, immediateFirstRetry));
         }
 
         public Task<T> Run(Func<CancellationToken, Task<T>> operation, CancellationToken cancellationToken)
@@ -42,17 +64,17 @@
                     result = await operation.Invoke(cancellationToken);
                 }
                 catch (Exception exception)
-                when (_transientFaultDetectionStrategy.IsTransientException(exception) && retryCount < _maximumRetryCount)
+                when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
                 {
-                    await Task.Delay(_retryIntervalStrategy.GetInterval(retryCount), cancellationToken);
+                    await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount), cancellationToken);
                     retryCount++;
                     goto Try;
                 }
 
-                if (_transientFaultDetectionStrategy.IsTransientResult(result) &&
-                    retryCount < _maximumRetryCount)
+                if (TransientFaultDetectionStrategy.IsTransientResult(result) &&
+                    retryCount < MaximumRetryCount)
                 {
-                    await Task.Delay(_retryIntervalStrategy.GetInterval(retryCount), cancellationToken);
+                    await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount), cancellationToken);
                     retryCount++;
                     goto Try;
                 }
