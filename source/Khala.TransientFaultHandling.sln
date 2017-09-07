@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.TransientFaultHandlin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.TransientFaultHandling", "Khala.TransientFaultHandling\Khala.TransientFaultHandling.csproj", "{C9471EEB-8098-4D41-848B-5217375D4B1A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.TransientFaultHandling.Testing", "Khala.TransientFaultHandling.Testing\Khala.TransientFaultHandling.Testing.csproj", "{A58E0041-95F3-40DA-9511-39F5FBEFB5BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C9471EEB-8098-4D41-848B-5217375D4B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9471EEB-8098-4D41-848B-5217375D4B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9471EEB-8098-4D41-848B-5217375D4B1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A58E0041-95F3-40DA-9511-39F5FBEFB5BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A58E0041-95F3-40DA-9511-39F5FBEFB5BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A58E0041-95F3-40DA-9511-39F5FBEFB5BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A58E0041-95F3-40DA-9511-39F5FBEFB5BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
