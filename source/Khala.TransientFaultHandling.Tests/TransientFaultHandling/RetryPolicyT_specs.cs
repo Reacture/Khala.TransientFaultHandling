@@ -76,6 +76,12 @@
         }
 
         [TestMethod]
+        public void Run_is_virtual()
+        {
+            typeof(RetryPolicy<>).GetMethod("Run").Should().BeVirtual();
+        }
+
+        [TestMethod]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(10)]

@@ -25,7 +25,7 @@
             _retryIntervalStrategy = retryIntervalStrategy ?? throw new ArgumentNullException(nameof(retryIntervalStrategy));
         }
 
-        public Task Run(Func<CancellationToken, Task> operation, CancellationToken cancellationToken)
+        public virtual Task Run(Func<CancellationToken, Task> operation, CancellationToken cancellationToken)
         {
             if (operation == null)
             {

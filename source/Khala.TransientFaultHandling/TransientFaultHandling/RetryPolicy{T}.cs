@@ -47,7 +47,7 @@
                 new ConstantRetryIntervalStrategy(interval, immediateFirstRetry));
         }
 
-        public Task<T> Run(Func<CancellationToken, Task<T>> operation, CancellationToken cancellationToken)
+        public virtual Task<T> Run(Func<CancellationToken, Task<T>> operation, CancellationToken cancellationToken)
         {
             if (operation == null)
             {
