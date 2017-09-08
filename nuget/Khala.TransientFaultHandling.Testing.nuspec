@@ -1,22 +1,25 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Khala.TransientFaultHandling</id>
+    <id>Khala.TransientFaultHandling.Testing</id>
     <version>0.2.0</version>
-    <title>Khala.TransientFaultHandling</title>
+    <title>Khala.TransientFaultHandling.Testing</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
     <licenseUrl>https://github.com/Reacture/Khala.TransientFaultHandling/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Reacture/Khala.TransientFaultHandling</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Implementation of Retry pattern</description>
+    <description>Provides testing tools for Khala.TransientFaultHandling</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright Gyuwon 2017</copyright>
-    <tags>Khala Retry Transient Fault</tags>
+    <tags>Khala Retry Transient Fault Test</tags>
     <dependencies>
+      <group targetFramework="net45">
+        <dependency id="Khala.TransientFaultHandling" version="0.2.0" />
+      </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\source\Khala.TransientFaultHandling\bin\Release\Khala.TransientFaultHandling.dll" target="lib\netstandard1.1\Khala.TransientFaultHandling.dll" />
+    <file src="..\source\Khala.TransientFaultHandling.Testing\bin\Release\Khala.TransientFaultHandling.Testing.dll" target="lib\net45\Khala.TransientFaultHandling.Testing.dll" />
   </files>
 </package>
