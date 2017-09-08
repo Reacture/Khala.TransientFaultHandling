@@ -27,9 +27,6 @@
                 new TransientFaultDetectionStrategy(),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, immediateFirstRetry: true),
                 Interceptor);
-
-            OperationNonCancellable = Operation;
-            OperationCancellable = Operation;
         }
 
         public TransientFaultHandlingSpy()
@@ -39,9 +36,40 @@
 
         public RetryPolicy Policy { get; }
 
-        public Func<Task> OperationNonCancellable { get; }
+        public virtual async Task Operation(CancellationToken cancellationToken)
+        {
+            _invocations++;
 
-        public Func<CancellationToken, Task> OperationCancellable { get; }
+            try
+            {
+                await _callback.Invoke(cancellationToken);
+            }
+            catch
+            {
+            }
+        }
+
+        public Task Operation() => Operation(CancellationToken.None);
+
+        public Task Operation<TArg>(TArg arg, CancellationToken cancellationToken)
+        {
+            return Operation(cancellationToken);
+        }
+
+        public Task Operation<TArg1, TArg2>(TArg1 arg1, TArg2 arg2, CancellationToken cancellationToken)
+        {
+            return Operation(cancellationToken);
+        }
+
+        public Task Operation<TArg1, TArg2, TArg3>(TArg1 arg1, TArg2 arg2, TArg3 arg3, CancellationToken cancellationToken)
+        {
+            return Operation(cancellationToken);
+        }
+
+        public Task Operation<TArg1, TArg2, TArg3, TArg4>(TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, CancellationToken cancellationToken)
+        {
+            return Operation(cancellationToken);
+        }
 
         public void Verify()
         {
@@ -71,21 +99,6 @@
             }
 
             return Intercept;
-        }
-
-        private Task Operation() => Operation(CancellationToken.None);
-
-        private async Task Operation(CancellationToken cancellationToken)
-        {
-            _invocations++;
-
-            try
-            {
-                await _callback.Invoke(cancellationToken);
-            }
-            catch
-            {
-            }
         }
 
         private class SpyRetryPolicy : RetryPolicy

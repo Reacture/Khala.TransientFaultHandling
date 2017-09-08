@@ -34,10 +34,9 @@
             var spy = new TransientFaultHandlingSpy(
                 functionProvider.Func<CancellationToken, Task>);
             RetryPolicy retryPolicy = spy.Policy;
-            Func<Task> operation = spy.OperationNonCancellable;
 
             // Act
-            await retryPolicy.Run(operation);
+            await retryPolicy.Run(spy.Operation);
 
             // Assert
             spy.Verify();
@@ -52,10 +51,9 @@
             var spy = new TransientFaultHandlingSpy<Result>(
                 functionProvider.Func<CancellationToken, Task<Result>>);
             RetryPolicy<Result> retryPolicy = spy.Policy;
-            Func<Task<Result>> operation = spy.OperationNonCancellable;
 
             // Act
-            await retryPolicy.Run(operation);
+            await retryPolicy.Run(spy.Operation);
 
             // Assert
             spy.Verify();

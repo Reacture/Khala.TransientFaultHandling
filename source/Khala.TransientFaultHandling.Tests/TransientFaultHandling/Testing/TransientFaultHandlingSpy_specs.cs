@@ -44,26 +44,10 @@
         }
 
         [TestMethod]
-        public void OperationNonCancellable_returns_Func_Task_instance()
+        public async Task given_Operation_non_cancellable_invoked_by_Policy_Verify_succeeds()
         {
             var sut = new TransientFaultHandlingSpy();
-            Func<Task> actual = sut.OperationNonCancellable;
-            actual.Should().NotBeNull();
-        }
-
-        [TestMethod]
-        public void OperationCancellable_returns_Func_CancellationToken_Task_instance()
-        {
-            var sut = new TransientFaultHandlingSpy();
-            Func<CancellationToken, Task> actual = sut.OperationCancellable;
-            actual.Should().NotBeNull();
-        }
-
-        [TestMethod]
-        public async Task given_OperationNonCancellable_invoked_by_Policy_Verify_succeeds()
-        {
-            var sut = new TransientFaultHandlingSpy();
-            await sut.Policy.Run(sut.OperationNonCancellable);
+            await sut.Policy.Run(sut.Operation);
 
             Action action = sut.Verify;
 
@@ -71,7 +55,7 @@
         }
 
         [TestMethod]
-        public void given_OperationNonCancellable_not_invoked_Verify_throws_InvalidOperationException()
+        public void given_Operation_non_cancellable_not_invoked_Verify_throws_InvalidOperationException()
         {
             var sut = new TransientFaultHandlingSpy();
             Action action = sut.Verify;
@@ -79,19 +63,19 @@
         }
 
         [TestMethod]
-        public async Task given_OperationNonCancellable_invoked_directly_Verify_throws_InvalidOperationException()
+        public async Task given_Operation_non_cancellable_invoked_directly_Verify_throws_InvalidOperationException()
         {
             // Arrange
             var sut = new TransientFaultHandlingSpy();
             try
             {
-                await sut.OperationNonCancellable.Invoke();
+                await sut.Operation();
             }
             catch
             {
             }
 
-            await sut.Policy.Run(sut.OperationNonCancellable);
+            await sut.Policy.Run(sut.Operation);
 
             // Act
             Action action = sut.Verify;
@@ -101,10 +85,10 @@
         }
 
         [TestMethod]
-        public async Task given_OperationCancellable_invoked_by_Policy_Verify_succeeds()
+        public async Task given_Operation_cancellable_invoked_by_Policy_Verify_succeeds()
         {
             var sut = new TransientFaultHandlingSpy();
-            await sut.Policy.Run(sut.OperationCancellable, CancellationToken.None);
+            await sut.Policy.Run(sut.Operation, CancellationToken.None);
 
             Action action = sut.Verify;
 
@@ -112,7 +96,7 @@
         }
 
         [TestMethod]
-        public void given_OperationCancellable_not_invoked_Verify_throws_InvalidOperationException()
+        public void given_Operation_cancellable_not_invoked_Verify_throws_InvalidOperationException()
         {
             var sut = new TransientFaultHandlingSpy();
             Action action = sut.Verify;
@@ -120,12 +104,12 @@
         }
 
         [TestMethod]
-        public async Task given_OperationCancellable_invoked_directly_Verify_throws_InvalidOperationException()
+        public async Task given_Operation_cancellable_invoked_directly_Verify_throws_InvalidOperationException()
         {
             var sut = new TransientFaultHandlingSpy();
             try
             {
-                await sut.OperationCancellable.Invoke(CancellationToken.None);
+                await sut.Operation(CancellationToken.None);
             }
             catch
             {
@@ -137,7 +121,7 @@
         }
 
         [TestMethod]
-        public async Task OperationNonCancellable_invokes_callback_with_none_cancellation_token()
+        public async Task Operation_non_cancellable_invokes_callback_with_none_cancellation_token()
         {
             var functionProvider = Mock.Of<IFunctionProvider>();
             var sut = new TransientFaultHandlingSpy(
@@ -145,7 +129,7 @@
 
             try
             {
-                await sut.OperationNonCancellable.Invoke();
+                await sut.Operation();
             }
             catch
             {
@@ -155,12 +139,12 @@
         }
 
         [TestMethod]
-        public void OperationNonCancellable_consumes_callback_exception()
+        public void Operation_non_cancellable_consumes_callback_exception()
         {
             var sut = new TransientFaultHandlingSpy(
                 cancellationToken => throw new NotImplementedException());
 
-            Func<Task> action = () => sut.OperationNonCancellable.Invoke();
+            Func<Task> action = () => sut.Operation();
 
             action.ShouldNotThrow<NotImplementedException>();
         }
@@ -168,7 +152,7 @@
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        public async Task OperationCancellable_invokes_callback(bool canceled)
+        public async Task Operation_cancellable_invokes_callback(bool canceled)
         {
             var cancellationToken = new CancellationToken(canceled);
             var functionProvider = Mock.Of<IFunctionProvider>();
@@ -177,7 +161,7 @@
 
             try
             {
-                await sut.OperationCancellable.Invoke(cancellationToken);
+                await sut.Operation(cancellationToken);
             }
             catch
             {
@@ -187,14 +171,70 @@
         }
 
         [TestMethod]
-        public void OperationCancellable_consumes_callback_exception()
+        public void Operation_cancellable_consumes_callback_exception()
         {
             var sut = new TransientFaultHandlingSpy(
                 cancellationToken => throw new NotImplementedException());
 
-            Func<Task> action = () => sut.OperationCancellable.Invoke(CancellationToken.None);
+            Func<Task> action = () => sut.Operation(CancellationToken.None);
 
             action.ShouldNotThrow<NotImplementedException>();
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task OperationT1_relays_to_Operation_cancellable(bool canceled)
+        {
+            var fixture = new Fixture();
+            var sut = Mock.Of<TransientFaultHandlingSpy>();
+            var cancellationToken = new CancellationToken(canceled);
+
+            await sut.Operation(fixture.Create<int>(), cancellationToken);
+
+            Mock.Get(sut).Verify(x => x.Operation(cancellationToken), Times.Once());
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task OperationT2_relays_to_Operation_cancellable(bool canceled)
+        {
+            var fixture = new Fixture();
+            var sut = Mock.Of<TransientFaultHandlingSpy>();
+            var cancellationToken = new CancellationToken(canceled);
+
+            await sut.Operation(fixture.Create<int>(), fixture.Create<uint>(), cancellationToken);
+
+            Mock.Get(sut).Verify(x => x.Operation(cancellationToken), Times.Once());
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task OperationT3_relays_to_Operation_cancellable(bool canceled)
+        {
+            var fixture = new Fixture();
+            var sut = Mock.Of<TransientFaultHandlingSpy>();
+            var cancellationToken = new CancellationToken(canceled);
+
+            await sut.Operation(fixture.Create<int>(), fixture.Create<uint>(), fixture.Create<long>(), cancellationToken);
+
+            Mock.Get(sut).Verify(x => x.Operation(cancellationToken), Times.Once());
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task OperationT4_relays_to_Operation_cancellable(bool canceled)
+        {
+            var fixture = new Fixture();
+            var sut = Mock.Of<TransientFaultHandlingSpy>();
+            var cancellationToken = new CancellationToken(canceled);
+
+            await sut.Operation(fixture.Create<int>(), fixture.Create<uint>(), fixture.Create<long>(), fixture.Create<ulong>(), cancellationToken);
+
+            Mock.Get(sut).Verify(x => x.Operation(cancellationToken), Times.Once());
         }
     }
 }
