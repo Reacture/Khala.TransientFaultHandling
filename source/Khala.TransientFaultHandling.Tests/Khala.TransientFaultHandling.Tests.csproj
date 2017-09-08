@@ -87,6 +87,7 @@
     <Compile Include="TransientFaultHandling\RetryIntervalStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryPolicyT_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryPolicy_specs.cs" />
+    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingSpyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientDefaultDetectionStrategyT_specs.cs" />

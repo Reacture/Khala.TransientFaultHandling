@@ -1,44 +1,33 @@
 ﻿namespace Khala.TransientFaultHandling.Testing
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
 
-    public class TransientFaultHandlingSpy
+    public class TransientFaultHandlingSpy<T>
     {
         private static readonly Random _random = new Random();
 
-        private readonly Func<CancellationToken, Task> _callback;
         private readonly int _maximumRetryCount;
         private readonly int _transientFaultCount;
         private int _invocationCount;
 
-        public TransientFaultHandlingSpy(Func<CancellationToken, Task> callback)
+        public TransientFaultHandlingSpy()
         {
-            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
             _maximumRetryCount = _random.Next(1000, 2000);
             _transientFaultCount = _random.Next(0, _maximumRetryCount);
             _invocationCount = 0;
 
-            Policy = new RetryPolicy(
+            Policy = new RetryPolicy<T>(
                 _maximumRetryCount,
-                new TransientFaultDetectionStrategy(),
+                new TransientFaultDetectionStrategy<T>(),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, immediateFirstRetry: true));
 
             OperationNonCancellable = Operation;
-            OperationCancellable = Operation;
         }
 
-        public TransientFaultHandlingSpy()
-            : this(cancellationToken => Task.FromResult(true))
-        {
-        }
+        public RetryPolicy<T> Policy { get; }
 
-        public RetryPolicy Policy { get; }
-
-        public Func<Task> OperationNonCancellable { get; }
-
-        public Func<CancellationToken, Task> OperationCancellable { get; }
+        public Func<Task<T>> OperationNonCancellable { get; } = () => Task.FromResult(default(T));
 
         public void Verify()
         {
@@ -50,23 +39,13 @@
             throw new InvalidOperationException("It seems that operation did not invoked by retry policy.");
         }
 
-        private Task Operation() => Operation(CancellationToken.None);
-
-        private async Task Operation(CancellationToken cancellationToken)
+        private Task<T> Operation()
         {
             _invocationCount++;
 
-            try
-            {
-                await _callback.Invoke(cancellationToken);
-            }
-            catch
-            {
-            }
-
             if (_invocationCount == _transientFaultCount + 1)
             {
-                return;
+                return Task.FromResult(default(T));
             }
 
             throw new InvalidOperationException("Transient fault occured. Try more please.");
