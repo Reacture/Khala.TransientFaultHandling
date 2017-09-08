@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Khala.TransientFaultHandling.Testing</id>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <title>Khala.TransientFaultHandling.Testing</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -15,7 +15,7 @@
     <tags>Khala Retry Transient Fault Test</tags>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="Khala.TransientFaultHandling" version="0.2.0" />
+        <dependency id="Khala.TransientFaultHandling" version="0.3.0" />
       </group>
     </dependencies>
   </metadata>
