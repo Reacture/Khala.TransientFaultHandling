@@ -81,6 +81,7 @@
         [TestMethod]
         public async Task given_OperationNonCancellable_invoked_directly_Verify_throws_InvalidOperationException()
         {
+            // Arrange
             var sut = new TransientFaultHandlingSpy();
             try
             {
@@ -90,8 +91,12 @@
             {
             }
 
+            await sut.Policy.Run(sut.OperationNonCancellable);
+
+            // Act
             Action action = sut.Verify;
 
+            // Assert
             action.ShouldThrow<InvalidOperationException>();
         }
 

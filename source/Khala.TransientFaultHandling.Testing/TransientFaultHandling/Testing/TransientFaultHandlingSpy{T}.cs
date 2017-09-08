@@ -11,7 +11,8 @@
         private readonly Func<CancellationToken, Task<T>> _callback;
         private readonly int _maximumRetryCount;
         private readonly int _transientFaultCount;
-        private int _invocationCount;
+        private int _intercepted;
+        private int _invocations;
 
         public TransientFaultHandlingSpy()
             : this(cancellationToken => Task.FromResult(default(T)))
@@ -23,12 +24,14 @@
             _callback = callback;
             _maximumRetryCount = _random.Next(1000, 2000);
             _transientFaultCount = _random.Next(0, _maximumRetryCount);
-            _invocationCount = 0;
+            _intercepted = 0;
+            _invocations = 0;
 
-            Policy = new RetryPolicy<T>(
+            Policy = new SpyRetryPolicy(
                 _maximumRetryCount,
                 new TransientFaultDetectionStrategy<T>(),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, immediateFirstRetry: true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero, immediateFirstRetry: true),
+                Interceptor);
 
             OperationNonCancellable = Operation;
             OperationCancellable = Operation;
@@ -42,34 +45,70 @@
 
         public void Verify()
         {
-            if (_invocationCount == _transientFaultCount + 1)
+            if (_invocations == _transientFaultCount + 1 &&
+                _invocations == _intercepted)
             {
                 return;
             }
 
-            throw new InvalidOperationException("It seems that operation did not invoked by retry policy.");
+            throw new InvalidOperationException("It seems that the operation did not invoked by retry policy or invoked directly.");
+        }
+
+        private Func<CancellationToken, Task<T>> Interceptor(Func<CancellationToken, Task<T>> operation)
+        {
+            async Task<T> Intercept(CancellationToken cancellationToken)
+            {
+                _intercepted++;
+
+                T result = await operation.Invoke(cancellationToken);
+
+                if (_invocations == _transientFaultCount + 1)
+                {
+                    return result;
+                }
+
+                throw new InvalidOperationException("Transient fault occured. Try more please.");
+            }
+
+            return Intercept;
         }
 
         private Task<T> Operation() => Operation(CancellationToken.None);
 
         private async Task<T> Operation(CancellationToken cancellationToken)
         {
-            _invocationCount++;
+            _invocations++;
 
             try
             {
-                await _callback.Invoke(cancellationToken);
+                return await _callback.Invoke(cancellationToken);
             }
             catch
             {
-            }
-
-            if (_invocationCount == _transientFaultCount + 1)
-            {
                 return default(T);
             }
+        }
 
-            throw new InvalidOperationException("Transient fault occured. Try more please.");
+        private class SpyRetryPolicy : RetryPolicy<T>
+        {
+            private readonly Func<Func<CancellationToken, Task<T>>, Func<CancellationToken, Task<T>>> _interceptor;
+
+            public SpyRetryPolicy(
+                int maximumRetryCount,
+                TransientFaultDetectionStrategy<T> transientFaultDetectionStrategy,
+                RetryIntervalStrategy retryIntervalStrategy,
+                Func<Func<CancellationToken, Task<T>>, Func<CancellationToken, Task<T>>> interceptor)
+                : base(maximumRetryCount, transientFaultDetectionStrategy, retryIntervalStrategy)
+            {
+                _interceptor = interceptor;
+            }
+
+            public override Task<T> Run(
+                Func<CancellationToken, Task<T>> operation,
+                CancellationToken cancellationToken)
+            {
+                return base.Run(_interceptor.Invoke(operation), cancellationToken);
+            }
         }
     }
 }
