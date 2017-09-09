@@ -8,19 +8,16 @@
     {
         private static readonly Random _random = new Random();
 
+        private readonly TResult _result;
         private readonly Action<CancellationToken> _callback;
         private readonly int _maximumRetryCount;
         private readonly int _transientFaultCount;
         private int _intercepted;
         private int _invocations;
 
-        public TransientFaultHandlingFuncSpy()
-            : this(cancellationToken => Task.FromResult(default(TResult)))
+        public TransientFaultHandlingFuncSpy(TResult result, Action<CancellationToken> callback)
         {
-        }
-
-        public TransientFaultHandlingFuncSpy(Action<CancellationToken> callback)
-        {
+            _result = result;
             _callback = callback;
             _maximumRetryCount = _random.Next(1000, 2000);
             _transientFaultCount = _random.Next(0, _maximumRetryCount);
@@ -32,6 +29,11 @@
                 new TransientFaultDetectionStrategy<TResult>(),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, immediateFirstRetry: true),
                 Interceptor);
+        }
+
+        public TransientFaultHandlingFuncSpy(TResult result)
+            : this(result, cancellationToken => Task.FromResult(default(TResult)))
+        {
         }
 
         public RetryPolicy<TResult> Policy { get; }
@@ -48,10 +50,8 @@
             {
             }
 
-            return Task.FromResult(default(TResult));
+            return Task.FromResult(_result);
         }
-
-        public Task<TResult> Operation() => Operation(CancellationToken.None);
 
         public void Verify()
         {

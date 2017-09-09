@@ -32,7 +32,5 @@
 
             return Task.FromResult(true);
         }
-
-        public Task Operation() => Operation(CancellationToken.None);
     }
 }

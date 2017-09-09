@@ -100,13 +100,5 @@
             Func<Task> action = () => sut.Operation(CancellationToken.None);
             action.ShouldNotThrow();
         }
-
-        [TestMethod]
-        public async Task modest_Operation_relays_with_none_cancellation_token()
-        {
-            var sut = Mock.Of<TransientFaultHandlingActionSpy>();
-            await sut.Operation();
-            Mock.Get(sut).Verify(x => x.Operation(CancellationToken.None), Times.Once());
-        }
     }
 }

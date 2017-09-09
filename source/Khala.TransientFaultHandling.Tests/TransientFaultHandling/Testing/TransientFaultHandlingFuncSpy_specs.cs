@@ -28,7 +28,7 @@
         [TestMethod]
         public void Policy_returns_RetryPolicy_instance()
         {
-            var sut = new TransientFaultHandlingFuncSpy<Result>();
+            var sut = new TransientFaultHandlingFuncSpy<Result>(new Result());
             RetryPolicy<Result> actual = sut.Policy;
             actual.Should().NotBeNull();
         }
@@ -36,7 +36,7 @@
         [TestMethod]
         public async Task given_Operation_invoked_by_Policy_Verify_succeeds()
         {
-            var sut = new TransientFaultHandlingFuncSpy<Result>();
+            var sut = new TransientFaultHandlingFuncSpy<Result>(new Result());
             await sut.Policy.Run(sut.Operation, CancellationToken.None);
 
             Action action = sut.Verify;
@@ -47,7 +47,7 @@
         [TestMethod]
         public void given_Operation_not_invoked_Verify_throws_InvalidOperationException()
         {
-            var sut = new TransientFaultHandlingFuncSpy<Result>();
+            var sut = new TransientFaultHandlingFuncSpy<Result>(new Result());
             Action action = sut.Verify;
             action.ShouldThrow<InvalidOperationException>();
         }
@@ -55,7 +55,7 @@
         [TestMethod]
         public async Task given_Operation_invoked_directly_Verify_throws_InvalidOperationException()
         {
-            var sut = new TransientFaultHandlingFuncSpy<Result>();
+            var sut = new TransientFaultHandlingFuncSpy<Result>(new Result());
             try
             {
                 await sut.Operation(CancellationToken.None);
@@ -70,13 +70,26 @@
         }
 
         [TestMethod]
+        public async Task Operation_returns_result_correctly()
+        {
+            var result = new Result();
+            var sut = new TransientFaultHandlingFuncSpy<Result>(result);
+
+            Result actual = await sut.Operation(CancellationToken.None);
+
+            actual.Should().BeSameAs(result);
+        }
+
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task Operation_invokes_callback(bool canceled)
         {
             var cancellationToken = new CancellationToken(canceled);
             var functionProvider = Mock.Of<IFunctionProvider>();
-            var sut = new TransientFaultHandlingFuncSpy<Result>(functionProvider.Action);
+            var sut = new TransientFaultHandlingFuncSpy<Result>(
+                new Result(),
+                functionProvider.Action);
 
             await sut.Operation(cancellationToken);
 
@@ -87,19 +100,12 @@
         public void Operation_absorbs_callback_exception()
         {
             var sut = new TransientFaultHandlingFuncSpy<Result>(
+                new Result(),
                 cancellationToken => throw new NotImplementedException());
 
             Func<Task> action = () => sut.Operation(CancellationToken.None);
 
             action.ShouldNotThrow<NotImplementedException>();
-        }
-
-        [TestMethod]
-        public async Task modest_Operation_relays_with_none_cancellation_token()
-        {
-            var sut = Mock.Of<TransientFaultHandlingFuncSpy<Result>>();
-            await sut.Operation();
-            Mock.Get(sut).Verify(x => x.Operation(CancellationToken.None), Times.Once());
         }
 
         public class Result

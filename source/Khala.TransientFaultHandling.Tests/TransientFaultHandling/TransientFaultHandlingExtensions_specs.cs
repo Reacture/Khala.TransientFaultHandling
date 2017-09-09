@@ -1,7 +1,9 @@
 ﻿namespace Khala.TransientFaultHandling
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using FluentAssertions;
     using Khala.TransientFaultHandling.Testing;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
@@ -26,27 +28,62 @@
         }
 
         [TestMethod]
-        public async Task Run_relays_to_retryPolicy_with_none_cancellation_token()
+        public async Task Run_relays_to_retryPolicy()
         {
             var functionProvider = Mock.Of<IFunctionProvider>();
             var spy = new TransientFaultHandlingActionSpy(functionProvider.Action);
 
-            await spy.Policy.Run(spy.Operation);
+            await spy.Policy.Run(() => spy.Operation(CancellationToken.None));
 
             spy.Verify();
-            Mock.Get(functionProvider).Verify(x => x.Action(CancellationToken.None));
         }
 
         [TestMethod]
-        public async Task RunT_relays_to_retryPolicy_with_non_cancellation_token()
+        public async Task Run_relays_to_retryPolicy_with_none_cancellation_token()
         {
-            var functionProvider = Mock.Of<IFunctionProvider>();
-            var spy = new TransientFaultHandlingFuncSpy<Result>(functionProvider.Action);
+            var maximumRetryCount = 1;
+            var retryPolicyMock = new Mock<RetryPolicy>(
+                maximumRetryCount,
+                new TransientFaultDetectionStrategy(),
+                new ConstantRetryIntervalStrategy(
+                    TimeSpan.Zero,
+                    immediateFirstRetry: true));
+            var retryPolicy = retryPolicyMock.Object;
 
-            await spy.Policy.Run(spy.Operation);
+            await retryPolicy.Run(() => Task.FromResult(true));
+
+            retryPolicyMock.Verify(x => x.Run(It.IsAny<Func<CancellationToken, Task>>(), CancellationToken.None), Times.Once());
+        }
+
+        [TestMethod]
+        public async Task RunT_relays_to_retryPolicy()
+        {
+            var result = new Result();
+            var functionProvider = Mock.Of<IFunctionProvider>();
+            var spy = new TransientFaultHandlingFuncSpy<Result>(result, functionProvider.Action);
+
+            Result actual = await spy.Policy.Run(() => spy.Operation(CancellationToken.None));
 
             spy.Verify();
-            Mock.Get(functionProvider).Verify(x => x.Action(CancellationToken.None));
+            actual.Should().BeSameAs(result);
+        }
+
+        [TestMethod]
+        public async Task RunT_relays_to_retryPolicy_with_none_cancellation_token()
+        {
+            var maximumRetryCount = 1;
+            var retryPolicyMock = new Mock<RetryPolicy<Result>>(
+                maximumRetryCount,
+                new TransientFaultDetectionStrategy<Result>(),
+                new ConstantRetryIntervalStrategy(
+                    TimeSpan.Zero,
+                    immediateFirstRetry: true));
+            var retryPolicy = retryPolicyMock.Object;
+            var result = new Result();
+
+            await retryPolicy.Run(() => Task.FromResult(result));
+
+            retryPolicyMock.Verify(x => x.Run(It.IsAny<Func<CancellationToken, Task<Result>>>(), CancellationToken.None), Times.Once());
         }
 
         public class Result
