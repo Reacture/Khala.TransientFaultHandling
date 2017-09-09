@@ -87,12 +87,13 @@
     <Compile Include="TransientFaultHandling\RetryIntervalStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryPolicyT_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryPolicy_specs.cs" />
-    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingSpyT_specs.cs" />
+    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingActionSpyT_specs.cs" />
+    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingFuncSpy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientDefaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultHandlingExtensions_specs.cs" />
-    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingSpy_specs.cs" />
+    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingActionSpy_specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -1,6 +1,5 @@
 ﻿namespace Khala.TransientFaultHandling
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Khala.TransientFaultHandling.Testing;
@@ -15,7 +14,7 @@
     {
         public interface IFunctionProvider
         {
-            TResult Func<T, TResult>(T arg);
+            void Action<TArg>(TArg arg);
         }
 
         [TestMethod]
@@ -29,35 +28,25 @@
         [TestMethod]
         public async Task Run_relays_to_retryPolicy_with_none_cancellation_token()
         {
-            // Arrange
             var functionProvider = Mock.Of<IFunctionProvider>();
-            var spy = new TransientFaultHandlingSpy(
-                functionProvider.Func<CancellationToken, Task>);
-            RetryPolicy retryPolicy = spy.Policy;
+            var spy = new TransientFaultHandlingActionSpy(functionProvider.Action);
 
-            // Act
-            await retryPolicy.Run(spy.Operation);
+            await spy.Policy.Run(spy.Operation);
 
-            // Assert
             spy.Verify();
-            Mock.Get(functionProvider).Verify(x => x.Func<CancellationToken, Task>(CancellationToken.None));
+            Mock.Get(functionProvider).Verify(x => x.Action(CancellationToken.None));
         }
 
         [TestMethod]
         public async Task RunT_relays_to_retryPolicy_with_non_cancellation_token()
         {
-            // Arrange
             var functionProvider = Mock.Of<IFunctionProvider>();
-            var spy = new TransientFaultHandlingSpy<Result>(
-                functionProvider.Func<CancellationToken, Task<Result>>);
-            RetryPolicy<Result> retryPolicy = spy.Policy;
+            var spy = new TransientFaultHandlingFuncSpy<Result>(functionProvider.Action);
 
-            // Act
-            await retryPolicy.Run(spy.Operation);
+            await spy.Policy.Run(spy.Operation);
 
-            // Assert
             spy.Verify();
-            Mock.Get(functionProvider).Verify(x => x.Func<CancellationToken, Task<Result>>(CancellationToken.None));
+            Mock.Get(functionProvider).Verify(x => x.Action(CancellationToken.None));
         }
 
         public class Result

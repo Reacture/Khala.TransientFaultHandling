@@ -43,8 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingSpy.cs" />
-    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingSpy{T}.cs" />
+    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingActionSpy.cs" />
+    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingActionSpyBase.cs" />
+    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingActionSpy{T}.cs" />
+    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingFuncSpy{TResult}.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Khala.TransientFaultHandling.Testing.ruleset" />

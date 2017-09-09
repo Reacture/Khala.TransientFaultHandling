@@ -4,19 +4,17 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class TransientFaultHandlingSpy
+    public abstract class TransientFaultHandlingActionSpyBase
     {
         private static readonly Random _random = new Random();
 
-        private readonly Func<CancellationToken, Task> _callback;
         private readonly int _maximumRetryCount;
         private readonly int _transientFaultCount;
         private int _intercepted;
         private int _invocations;
 
-        public TransientFaultHandlingSpy(Func<CancellationToken, Task> callback)
+        internal TransientFaultHandlingActionSpyBase()
         {
-            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
             _maximumRetryCount = _random.Next(1000, 2000);
             _transientFaultCount = _random.Next(0, _maximumRetryCount);
             _intercepted = 0;
@@ -29,47 +27,7 @@
                 Interceptor);
         }
 
-        public TransientFaultHandlingSpy()
-            : this(cancellationToken => Task.FromResult(true))
-        {
-        }
-
         public RetryPolicy Policy { get; }
-
-        public virtual async Task Operation(CancellationToken cancellationToken)
-        {
-            _invocations++;
-
-            try
-            {
-                await _callback.Invoke(cancellationToken);
-            }
-            catch
-            {
-            }
-        }
-
-        public Task Operation() => Operation(CancellationToken.None);
-
-        public Task Operation<TArg>(TArg arg, CancellationToken cancellationToken)
-        {
-            return Operation(cancellationToken);
-        }
-
-        public Task Operation<TArg1, TArg2>(TArg1 arg1, TArg2 arg2, CancellationToken cancellationToken)
-        {
-            return Operation(cancellationToken);
-        }
-
-        public Task Operation<TArg1, TArg2, TArg3>(TArg1 arg1, TArg2 arg2, TArg3 arg3, CancellationToken cancellationToken)
-        {
-            return Operation(cancellationToken);
-        }
-
-        public Task Operation<TArg1, TArg2, TArg3, TArg4>(TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, CancellationToken cancellationToken)
-        {
-            return Operation(cancellationToken);
-        }
 
         public void Verify()
         {
@@ -81,6 +39,8 @@
 
             throw new InvalidOperationException("It seems that the operation did not invoked by retry policy or invoked directly.");
         }
+
+        internal void OnInvoked() => _invocations++;
 
         private Func<CancellationToken, Task> Interceptor(Func<CancellationToken, Task> operation)
         {
