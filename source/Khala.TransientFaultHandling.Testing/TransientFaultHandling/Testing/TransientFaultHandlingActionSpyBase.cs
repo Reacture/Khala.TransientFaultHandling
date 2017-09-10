@@ -1,7 +1,6 @@
 ﻿namespace Khala.TransientFaultHandling.Testing
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
 
     public abstract class TransientFaultHandlingActionSpyBase
