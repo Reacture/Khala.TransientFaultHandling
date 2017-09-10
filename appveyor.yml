@@ -8,8 +8,6 @@ build:
 after_build:
 - cmd: >-
     nuget pack nuget\Khala.TransientFaultHandling.nuspec
-
-    nuget pack nuget\Khala.TransientFaultHandling.Testing.nuspec
 test:
   assemblies: '**\*.tests.dll'
 artifacts:
