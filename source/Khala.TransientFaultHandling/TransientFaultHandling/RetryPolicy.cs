@@ -27,6 +27,26 @@
 
         public RetryIntervalStrategy RetryIntervalStrategy { get; }
 
+        public static RetryPolicy Linear(int maximumRetryCount, TimeSpan increment)
+        {
+            return new RetryPolicy(
+                maximumRetryCount,
+                new TransientFaultDetectionStrategy(),
+                new LinearRetryIntervalStrategy(
+                    TimeSpan.Zero,
+                    increment,
+                    maximumInterval: TimeSpan.MaxValue,
+                    immediateFirstRetry: false));
+        }
+
+        public static RetryPolicy Constant(int maximumRetryCount, TimeSpan interval, bool immediateFirstRetry)
+        {
+            return new RetryPolicy(
+                maximumRetryCount,
+                new TransientFaultDetectionStrategy(),
+                new ConstantRetryIntervalStrategy(interval, immediateFirstRetry));
+        }
+
         public virtual Task Run(
             Func<CancellationToken, Task> operation,
             CancellationToken cancellationToken)

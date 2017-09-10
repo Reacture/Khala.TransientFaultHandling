@@ -352,6 +352,46 @@
             }
         }
 
+        [TestMethod]
+        public void Linear_builds_RetryPolicy_correctly()
+        {
+            var fixture = new Fixture();
+            var maximumRetryCount = fixture.Create<int>();
+            var increment = fixture.Create<TimeSpan>();
+
+            RetryPolicy actual = RetryPolicy.Linear(maximumRetryCount, increment);
+
+            actual.Should().NotBeNull();
+            actual.MaximumRetryCount.Should().Be(maximumRetryCount);
+            actual.TransientFaultDetectionStrategy.Should().BeOfType<TransientFaultDetectionStrategy>();
+            actual.RetryIntervalStrategy.Should().Match<LinearRetryIntervalStrategy>(
+                x =>
+                x.MaximumInterval == TimeSpan.MaxValue &&
+                x.InitialInterval == TimeSpan.Zero &&
+                x.Increment == increment &&
+                x.ImmediateFirstRetry == false);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void Constant_builds_RetryPolicy_correctly(bool immediateFirstRetry)
+        {
+            var fixture = new Fixture();
+            var maximumRetryCount = fixture.Create<int>();
+            var interval = fixture.Create<TimeSpan>();
+
+            RetryPolicy actual = RetryPolicy.Constant(maximumRetryCount, interval, immediateFirstRetry);
+
+            actual.Should().NotBeNull();
+            actual.MaximumRetryCount.Should().Be(maximumRetryCount);
+            actual.TransientFaultDetectionStrategy.Should().BeOfType<TransientFaultDetectionStrategy>();
+            actual.RetryIntervalStrategy.Should().Match<ConstantRetryIntervalStrategy>(
+                x =>
+                x.Interval == interval &&
+                x.ImmediateFirstRetry == immediateFirstRetry);
+        }
+
         public class Arg
         {
         }
