@@ -5,10 +5,6 @@
 
     public class RetryPolicy
     {
-        private readonly int _maximumRetryCount;
-        private readonly TransientFaultDetectionStrategy _transientFaultDetectionStrategy;
-        private readonly RetryIntervalStrategy _retryIntervalStrategy;
-
         public RetryPolicy(
             int maximumRetryCount,
             TransientFaultDetectionStrategy transientFaultDetectionStrategy,
@@ -19,10 +15,16 @@
                 throw new ArgumentOutOfRangeException(nameof(maximumRetryCount), "Value cannot be negative.");
             }
 
-            _maximumRetryCount = maximumRetryCount;
-            _transientFaultDetectionStrategy = transientFaultDetectionStrategy ?? throw new ArgumentNullException(nameof(transientFaultDetectionStrategy));
-            _retryIntervalStrategy = retryIntervalStrategy ?? throw new ArgumentNullException(nameof(retryIntervalStrategy));
+            MaximumRetryCount = maximumRetryCount;
+            TransientFaultDetectionStrategy = transientFaultDetectionStrategy ?? throw new ArgumentNullException(nameof(transientFaultDetectionStrategy));
+            RetryIntervalStrategy = retryIntervalStrategy ?? throw new ArgumentNullException(nameof(retryIntervalStrategy));
         }
+
+        public int MaximumRetryCount { get; }
+
+        public TransientFaultDetectionStrategy TransientFaultDetectionStrategy { get; }
+
+        public RetryIntervalStrategy RetryIntervalStrategy { get; }
 
         public virtual Task Run(Func<Task> operation)
         {
@@ -40,9 +42,9 @@
                     await operation.Invoke();
                 }
                 catch (Exception exception)
-                when (_transientFaultDetectionStrategy.IsTransientException(exception) && retryCount < _maximumRetryCount)
+                when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
                 {
-                    await Task.Delay(_retryIntervalStrategy.GetInterval(retryCount));
+                    await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount));
                     retryCount++;
                     goto Try;
                 }

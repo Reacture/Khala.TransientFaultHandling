@@ -29,6 +29,21 @@
         }
 
         [TestMethod]
+        public void constructor_sets_properties_correctly()
+        {
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var maximumRetryCount = fixture.Create<int>();
+            var detectionStrategy = fixture.Create<TransientFaultDetectionStrategy>();
+            var intervalStrategy = fixture.Create<RetryIntervalStrategy>();
+
+            var sut = new RetryPolicy(maximumRetryCount, detectionStrategy, intervalStrategy);
+
+            sut.MaximumRetryCount.Should().Be(maximumRetryCount);
+            sut.TransientFaultDetectionStrategy.Should().BeSameAs(detectionStrategy);
+            sut.RetryIntervalStrategy.Should().BeSameAs(intervalStrategy);
+        }
+
+        [TestMethod]
         [DataRow(-1)]
         [DataRow(-10)]
         public void constructor_has_guard_clause_against_negative_maximumRetryCount(int maximumRetryCount)
