@@ -10,6 +10,11 @@
             Interval = interval;
         }
 
+        public ConstantRetryIntervalStrategy(TimeSpan interval)
+            : this(interval, immediateFirstRetry: false)
+        {
+        }
+
         public TimeSpan Interval { get; }
 
         protected override TimeSpan GetIntervalFromZeroBasedTick(int tick) => Interval;

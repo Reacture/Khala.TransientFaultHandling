@@ -27,7 +27,7 @@
             Policy = new SpyRetryPolicy(
                 _maximumRetryCount,
                 new TransientFaultDetectionStrategy<TResult>(),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, immediateFirstRetry: true),
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero),
                 Interceptor);
         }
 

@@ -22,7 +22,7 @@
             Policy = new SpyRetryPolicy(
                 _maximumRetryCount,
                 new TransientFaultDetectionStrategy(),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, immediateFirstRetry: true),
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero),
                 Interceptor);
         }
 

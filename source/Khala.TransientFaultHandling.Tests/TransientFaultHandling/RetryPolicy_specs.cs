@@ -92,7 +92,7 @@
             var sut = new RetryPolicy(
                 maximumRetryCount,
                 new TransientFaultDetectionStrategy(),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             // Act
             await sut.Run(oper.Operation);
@@ -113,7 +113,7 @@
             var sut = new RetryPolicy(
                 maximumRetryCount,
                 new TransientFaultDetectionStrategy(),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             // Act
             Func<Task> action = () => sut.Run(oper.Operation);
@@ -133,7 +133,7 @@
             var sut = new RetryPolicy(
                 maximumRetryCount,
                 new DelegatingTransientFaultDetectionStrategy(x => x != exception),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             // Act
             Func<Task> action = () => sut.Run(oper.Operation);

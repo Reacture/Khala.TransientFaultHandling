@@ -93,7 +93,7 @@
                 new DelegatingTransientFaultDetectionStrategy<Result>(
                     exception => false,
                     result => false),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, false));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             var expected = new Result();
             var functionProvider = Mock.Of<IFunctionProvider>(
@@ -120,7 +120,7 @@
             var sut = new RetryPolicy<Result>(
                 maximumRetryCount,
                 new DelegatingTransientFaultDetectionStrategy<Result>(x => true, x => x != result),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             // Act
             Result actual = await sut.Run(oper.Operation);
@@ -142,7 +142,7 @@
             var sut = new RetryPolicy<Result>(
                 maximumRetryCount,
                 new DelegatingTransientFaultDetectionStrategy<Result>(x => true, x => x is TransientResult),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             // Act
             Result actual = await sut.Run(oper.Operation);
@@ -165,7 +165,7 @@
             var sut = new RetryPolicy<Result>(
                 maximumRetryCount,
                 new DelegatingTransientFaultDetectionStrategy<Result>(x => true, x => x != result),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             // Act
             Func<Task> action = () => sut.Run(oper.Operation);
@@ -188,7 +188,7 @@
             var sut = new RetryPolicy<Result>(
                 maximumRetryCount,
                 new DelegatingTransientFaultDetectionStrategy<Result>(x => true, x => x is TransientResult),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             // Act
             Result actual = await sut.Run(oper.Operation);
@@ -211,7 +211,7 @@
                 new DelegatingTransientFaultDetectionStrategy<Result>(
                     x => x != exception,
                     x => x is TransientResult),
-                new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
 
             // Act
             Func<Task> action = () => sut.Run(oper.Operation);
