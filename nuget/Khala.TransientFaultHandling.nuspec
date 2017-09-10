@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Khala.TransientFaultHandling</id>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
     <title>Khala.TransientFaultHandling</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
