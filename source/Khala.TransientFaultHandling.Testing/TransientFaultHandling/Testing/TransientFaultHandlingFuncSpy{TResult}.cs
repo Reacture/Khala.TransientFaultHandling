@@ -64,13 +64,13 @@
             throw new InvalidOperationException("It seems that the operation did not invoked by retry policy or invoked directly.");
         }
 
-        private Func<CancellationToken, Task<TResult>> Interceptor(Func<CancellationToken, Task<TResult>> operation)
+        private Func<Task<TResult>> Interceptor(Func<Task<TResult>> operation)
         {
-            async Task<TResult> Intercept(CancellationToken cancellationToken)
+            async Task<TResult> Intercept()
             {
                 _intercepted++;
 
-                TResult result = await operation.Invoke(cancellationToken);
+                TResult result = await operation.Invoke();
 
                 if (_invocations == _transientFaultCount + 1)
                 {
@@ -85,23 +85,21 @@
 
         private class SpyRetryPolicy : RetryPolicy<TResult>
         {
-            private readonly Func<Func<CancellationToken, Task<TResult>>, Func<CancellationToken, Task<TResult>>> _interceptor;
+            private readonly Func<Func<Task<TResult>>, Func<Task<TResult>>> _interceptor;
 
             public SpyRetryPolicy(
                 int maximumRetryCount,
                 TransientFaultDetectionStrategy<TResult> transientFaultDetectionStrategy,
                 RetryIntervalStrategy retryIntervalStrategy,
-                Func<Func<CancellationToken, Task<TResult>>, Func<CancellationToken, Task<TResult>>> interceptor)
+                Func<Func<Task<TResult>>, Func<Task<TResult>>> interceptor)
                 : base(maximumRetryCount, transientFaultDetectionStrategy, retryIntervalStrategy)
             {
                 _interceptor = interceptor;
             }
 
-            public override Task<TResult> Run(
-                Func<CancellationToken, Task<TResult>> operation,
-                CancellationToken cancellationToken)
+            public override Task<TResult> Run(Func<Task<TResult>> operation)
             {
-                return base.Run(_interceptor.Invoke(operation), cancellationToken);
+                return base.Run(_interceptor.Invoke(operation));
             }
         }
     }

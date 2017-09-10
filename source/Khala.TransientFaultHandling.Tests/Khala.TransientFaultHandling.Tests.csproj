@@ -92,7 +92,6 @@
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientDefaultDetectionStrategyT_specs.cs" />
-    <Compile Include="TransientFaultHandling\TransientFaultHandlingExtensions_specs.cs" />
     <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingActionSpy_specs.cs" />
   </ItemGroup>
   <ItemGroup>

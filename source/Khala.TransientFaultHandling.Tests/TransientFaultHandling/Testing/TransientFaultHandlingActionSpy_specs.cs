@@ -47,7 +47,7 @@
         public async Task given_Operation_invoked_by_Policy_Verify_succeeds()
         {
             var sut = new TransientFaultHandlingActionSpy();
-            await sut.Policy.Run(sut.Operation, CancellationToken.None);
+            await sut.Policy.Run(() => sut.Operation(CancellationToken.None));
 
             Action action = sut.Verify;
 

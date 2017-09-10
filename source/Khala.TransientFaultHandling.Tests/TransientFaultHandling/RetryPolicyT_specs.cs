@@ -18,7 +18,7 @@
     {
         public interface IFunctionProvider
         {
-            TResult Func<T, TResult>(T arg);
+            TResult Func<TResult>();
         }
 
         [TestMethod]
@@ -95,18 +95,17 @@
                     result => false),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, false));
 
-            var cancellationToken = default(CancellationToken);
             var expected = new Result();
             var functionProvider = Mock.Of<IFunctionProvider>(
-                x => x.Func<CancellationToken, Task<Result>>(cancellationToken) == Task.FromResult(expected));
-            Func<CancellationToken, Task<Result>> operation = functionProvider.Func<CancellationToken, Task<Result>>;
+                x => x.Func<Task<Result>>() == Task.FromResult(expected));
+            Func<Task<Result>> operation = functionProvider.Func<Task<Result>>;
 
             // Act
-            Result actual = await sut.Run(operation, cancellationToken);
+            Result actual = await sut.Run(operation);
 
             // Assert
             actual.Should().BeSameAs(expected);
-            Mock.Get(functionProvider).Verify(x => x.Func<CancellationToken, Task<Result>>(cancellationToken), Times.Once());
+            Mock.Get(functionProvider).Verify(x => x.Func<Task<Result>>(), Times.Once());
         }
 
         [TestMethod]
@@ -124,7 +123,7 @@
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
-            Result actual = await sut.Run(oper.Operation, CancellationToken.None);
+            Result actual = await sut.Run(oper.Operation);
 
             // Assert
             oper.InvocationCount.Should().Be(failTimes + 1);
@@ -146,7 +145,7 @@
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
-            Result actual = await sut.Run(oper.Operation, CancellationToken.None);
+            Result actual = await sut.Run(oper.Operation);
 
             // Assert
             oper.InvocationCount.Should().Be(failTimes + 1);
@@ -169,7 +168,7 @@
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
-            Func<Task> action = () => sut.Run(oper.Operation, CancellationToken.None);
+            Func<Task> action = () => sut.Run(oper.Operation);
 
             // Assert
             action.ShouldThrow<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
@@ -192,7 +191,7 @@
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
-            Result actual = await sut.Run(oper.Operation, CancellationToken.None);
+            Result actual = await sut.Run(oper.Operation);
 
             // Assert
             actual.Should().BeSameAs(transientResults[maximumRetryCount]);
@@ -215,7 +214,7 @@
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
-            Func<Task> action = () => sut.Run(oper.Operation, CancellationToken.None);
+            Func<Task> action = () => sut.Run(oper.Operation);
 
             // Assert
             action.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
@@ -239,7 +238,7 @@
                 new DelegatingRetryIntervalStrategy(t => delays[t], false));
 
             // Act
-            await sut.Run(spy.Operation, CancellationToken.None);
+            await sut.Run(spy.Operation);
 
             // Assert
             for (int i = 0; i < spy.Laps.Count - 1; i++)
@@ -314,7 +313,7 @@
 
             public int InvocationCount => _invocationCount;
 
-            public Task<Result> Operation(CancellationToken cancellationToken)
+            public Task<Result> Operation()
             {
                 try
                 {
@@ -347,7 +346,7 @@
 
             public int InvocationCount => _invocationCount;
 
-            public Task<Result> Operation(CancellationToken cancellationToken)
+            public Task<Result> Operation()
             {
                 try
                 {
@@ -378,7 +377,7 @@
 
             public IReadOnlyList<DateTime> Laps => _laps;
 
-            public Task<Result> Operation(CancellationToken cancellationToken)
+            public Task<Result> Operation()
             {
                 var now = DateTime.Now;
 

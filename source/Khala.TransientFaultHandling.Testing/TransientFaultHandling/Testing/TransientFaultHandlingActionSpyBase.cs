@@ -42,13 +42,13 @@
 
         internal void OnInvoked() => _invocations++;
 
-        private Func<CancellationToken, Task> Interceptor(Func<CancellationToken, Task> operation)
+        private Func<Task> Interceptor(Func<Task> operation)
         {
-            async Task Intercept(CancellationToken cancellationToken)
+            async Task Intercept()
             {
                 _intercepted++;
 
-                await operation.Invoke(cancellationToken);
+                await operation.Invoke();
 
                 if (_invocations == _transientFaultCount + 1)
                 {
@@ -63,23 +63,21 @@
 
         private class SpyRetryPolicy : RetryPolicy
         {
-            private readonly Func<Func<CancellationToken, Task>, Func<CancellationToken, Task>> _interceptor;
+            private readonly Func<Func<Task>, Func<Task>> _interceptor;
 
             public SpyRetryPolicy(
                 int maximumRetryCount,
                 TransientFaultDetectionStrategy transientFaultDetectionStrategy,
                 RetryIntervalStrategy retryIntervalStrategy,
-                Func<Func<CancellationToken, Task>, Func<CancellationToken, Task>> interceptor)
+                Func<Func<Task>, Func<Task>> interceptor)
                 : base(maximumRetryCount, transientFaultDetectionStrategy, retryIntervalStrategy)
             {
                 _interceptor = interceptor;
             }
 
-            public override Task Run(
-                Func<CancellationToken, Task> operation,
-                CancellationToken cancellationToken)
+            public override Task Run(Func<Task> operation)
             {
-                return base.Run(_interceptor.Invoke(operation), cancellationToken);
+                return base.Run(_interceptor.Invoke(operation));
             }
         }
     }

@@ -48,7 +48,7 @@
         {
             var sut = new TransientFaultHandlingActionSpy<Arg>();
             var arg = new Arg();
-            await sut.Policy.Run(cancellationToken => sut.Operation(arg, cancellationToken), CancellationToken.None);
+            await sut.Policy.Run(() => sut.Operation(arg, CancellationToken.None));
 
             Action action = sut.Verify;
 

@@ -17,7 +17,7 @@
     {
         public interface IFunctionProvider
         {
-            TResult Func<T, TResult>(T arg);
+            TResult Func<TResult>();
         }
 
         [TestMethod]
@@ -71,16 +71,14 @@
                 transientFaultDetectionStrategy,
                 retryIntervalStrategy);
 
-            var cancellationToken = default(CancellationToken);
             var functionProvider = Mock.Of<IFunctionProvider>(
-                x => x.Func<CancellationToken, Task>(cancellationToken) == Task.FromResult(true));
-            Func<CancellationToken, Task> operation = functionProvider.Func<CancellationToken, Task>;
+                x => x.Func<Task>() == Task.FromResult(true));
 
             // Act
-            await sut.Run(operation, cancellationToken);
+            await sut.Run(functionProvider.Func<Task>);
 
             // Assert
-            Mock.Get(functionProvider).Verify(x => x.Func<CancellationToken, Task>(cancellationToken), Times.Once());
+            Mock.Get(functionProvider).Verify(x => x.Func<Task>(), Times.Once());
         }
 
         [TestMethod]
@@ -97,7 +95,7 @@
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
-            await sut.Run(oper.Operation, CancellationToken.None);
+            await sut.Run(oper.Operation);
 
             // Assert
             oper.Laps.Count.Should().Be(failTimes + 1);
@@ -118,7 +116,7 @@
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
-            Func<Task> action = () => sut.Run(oper.Operation, CancellationToken.None);
+            Func<Task> action = () => sut.Run(oper.Operation);
 
             // Assert
             action.ShouldThrow<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
@@ -138,7 +136,7 @@
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero, true));
 
             // Act
-            Func<Task> action = () => sut.Run(oper.Operation, CancellationToken.None);
+            Func<Task> action = () => sut.Run(oper.Operation);
 
             // Assert
             action.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
@@ -163,7 +161,7 @@
                 new DelegatingRetryIntervalStrategy(t => delays[t], false));
 
             // Act
-            await sut.Run(spy.Operation, CancellationToken.None);
+            await sut.Run(spy.Operation);
 
             // Assert
             for (int i = 0; i < spy.Laps.Count - 1; i++)
@@ -188,7 +186,7 @@
 
             public IReadOnlyList<DateTime> Laps => _laps;
 
-            public Task Operation(CancellationToken cancellationToken)
+            public Task Operation()
             {
                 var now = DateTime.Now;
 
