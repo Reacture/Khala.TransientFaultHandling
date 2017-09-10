@@ -1,6 +1,7 @@
 ﻿namespace Khala.TransientFaultHandling
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
     public class RetryPolicy
@@ -26,7 +27,9 @@
 
         public RetryIntervalStrategy RetryIntervalStrategy { get; }
 
-        public virtual Task Run(Func<Task> operation)
+        public virtual Task Run(
+            Func<CancellationToken, Task> operation,
+            CancellationToken cancellationToken)
         {
             if (operation == null)
             {
@@ -39,7 +42,7 @@
                 Try:
                 try
                 {
-                    await operation.Invoke();
+                    await operation.Invoke(cancellationToken);
                 }
                 catch (Exception exception)
                 when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
@@ -51,6 +54,19 @@
             }
 
             return Run();
+        }
+
+        public virtual Task Run<T>(
+            Func<T, CancellationToken, Task> operation,
+            T arg,
+            CancellationToken cancellationToken)
+        {
+            if (operation == null)
+            {
+                throw new ArgumentNullException(nameof(operation));
+            }
+
+            return Run(ct => operation.Invoke(arg, ct), cancellationToken);
         }
     }
 }

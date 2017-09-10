@@ -17,7 +17,9 @@
     {
         public interface IFunctionProvider
         {
-            TResult Func<TResult>();
+            TResult Func<T, TResult>(T arg);
+
+            TResult Func<T1, T2, TResult>(T1 arg1, T2 arg2);
         }
 
         [TestMethod]
@@ -61,16 +63,13 @@
         }
 
         [TestMethod]
-        public void Run_is_virtual()
-        {
-            typeof(RetryPolicy).GetMethod("Run").Should().BeVirtual();
-        }
-
-        [TestMethod]
-        [DataRow(0)]
-        [DataRow(1)]
-        [DataRow(10)]
-        public async Task Run_invokes_operation_at_least_once(int maximumRetryCount)
+        [DataRow(0, true)]
+        [DataRow(1, true)]
+        [DataRow(10, true)]
+        [DataRow(0, false)]
+        [DataRow(1, false)]
+        [DataRow(10, false)]
+        public async Task Run_invokes_operation_at_least_once(int maximumRetryCount, bool canceled)
         {
             // Arrange
             TransientFaultDetectionStrategy transientFaultDetectionStrategy =
@@ -86,76 +85,89 @@
                 transientFaultDetectionStrategy,
                 retryIntervalStrategy);
 
-            var functionProvider = Mock.Of<IFunctionProvider>(
-                x => x.Func<Task>() == Task.FromResult(true));
+            var functionProvider = Mock.Of<IFunctionProvider>();
+            var cancellationToken = new CancellationToken(canceled);
 
             // Act
-            await sut.Run(functionProvider.Func<Task>);
+            await sut.Run(functionProvider.Func<CancellationToken, Task>, cancellationToken);
 
             // Assert
-            Mock.Get(functionProvider).Verify(x => x.Func<Task>(), Times.Once());
+            Mock.Get(functionProvider).Verify(x => x.Func<CancellationToken, Task>(cancellationToken), Times.AtLeastOnce());
         }
 
         [TestMethod]
-        public async Task Run_invokes_operation_repeatedly_until_succeeds()
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task Run_invokes_operation_repeatedly_until_succeeds(bool canceled)
         {
             // Arrange
             var generator = new Generator<int>(new Fixture());
-            var failTimes = generator.First(x => x > 0);
-            var maximumRetryCount = failTimes + generator.First(x => x > 0);
-            var oper = new EventualSuccessOperator(Enumerable.Repeat(new Exception(), failTimes));
+            var transientFaultCount = generator.First(x => x > 0);
+            var maximumRetryCount = transientFaultCount + generator.First(x => x > 0);
+            var oper = new EventualSuccessOperator(transientFaultCount);
             var sut = new RetryPolicy(
                 maximumRetryCount,
                 new TransientFaultDetectionStrategy(),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero));
+            var cancellationToken = new CancellationToken(canceled);
 
             // Act
-            await sut.Run(oper.Operation);
+            await sut.Run(oper.Operation, cancellationToken);
 
             // Assert
-            oper.Laps.Count.Should().Be(failTimes + 1);
+            Mock.Get(oper.FunctionProvider).Verify(x => x.Func<CancellationToken, Task>(cancellationToken), Times.Exactly(transientFaultCount + 1));
         }
 
         [TestMethod]
-        public void Run_throws_exception_if_retry_count_reaches_maximumRetryCount()
+        [DataRow(true)]
+        [DataRow(false)]
+        public void Run_throws_exception_if_retry_count_reaches_maximumRetryCount(bool canceled)
         {
             // Arrange
             var generator = new Generator<int>(new Fixture());
             var maximumRetryCount = generator.First(x => x > 0);
-            var failTimes = maximumRetryCount + generator.First(x => x > 0);
-            Exception[] exceptions = Enumerable.Range(0, failTimes).Select(_ => new Exception()).ToArray();
-            var oper = new EventualSuccessOperator(exceptions);
+            var transientFaultCount = maximumRetryCount + generator.First(x => x > 0);
+            Exception[] exceptions = Enumerable.Range(0, transientFaultCount).Select(_ => new Exception()).ToArray();
+            var oper = new EventualSuccessOperator(
+                transientFaultCount,
+                triedTimes => exceptions[triedTimes]);
             var sut = new RetryPolicy(
                 maximumRetryCount,
                 new TransientFaultDetectionStrategy(),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero));
+            var cancellationToken = new CancellationToken(canceled);
 
             // Act
-            Func<Task> action = () => sut.Run(oper.Operation);
+            Func<Task> action = () => sut.Run(oper.Operation, cancellationToken);
 
             // Assert
             action.ShouldThrow<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
-            oper.Laps.Count.Should().Be(maximumRetryCount + 1);
+            Mock.Get(oper.FunctionProvider).Verify(x => x.Func<CancellationToken, Task>(cancellationToken), Times.Exactly(maximumRetryCount + 1));
         }
 
         [TestMethod]
-        public void Run_throws_exception_immediately_if_not_transient()
+        [DataRow(true)]
+        [DataRow(false)]
+        public void Run_throws_exception_immediately_if_not_transient(bool canceled)
         {
             // Arrange
             var exception = new Exception();
             var maximumRetryCount = 2;
-            var oper = new EventualSuccessOperator(new[] { exception });
+            var oper = new EventualSuccessOperator(
+                transientFaultCount: 1,
+                transientExceptionFactory: () => exception);
             var sut = new RetryPolicy(
                 maximumRetryCount,
                 new DelegatingTransientFaultDetectionStrategy(x => x != exception),
                 new ConstantRetryIntervalStrategy(TimeSpan.Zero));
+            var cancellationToken = new CancellationToken(canceled);
 
             // Act
-            Func<Task> action = () => sut.Run(oper.Operation);
+            Func<Task> action = () => sut.Run(oper.Operation, cancellationToken);
 
             // Assert
             action.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
-            oper.Laps.Count.Should().Be(1);
+            Mock.Get(oper.FunctionProvider).Verify(x => x.Func<CancellationToken, Task>(cancellationToken), Times.Once());
         }
 
         [TestMethod]
@@ -164,59 +176,252 @@
             // Arrange
             var generator = new Generator<int>(new Fixture());
             var maximumRetryCount = generator.First(x => x < 10);
-            var exceptions = Enumerable.Repeat(new Exception(), maximumRetryCount);
             TimeSpan[] delays = Enumerable
                 .Range(0, maximumRetryCount)
                 .Select(_ => TimeSpan.FromMilliseconds(new Fixture().Create<int>()))
                 .ToArray();
-            var spy = new EventualSuccessOperator(exceptions);
+            var spy = new EventualSuccessOperator(transientFaultCount: maximumRetryCount);
             var sut = new RetryPolicy(
                 maximumRetryCount,
                 new TransientFaultDetectionStrategy(),
                 new DelegatingRetryIntervalStrategy(t => delays[t], false));
 
             // Act
-            await sut.Run(spy.Operation);
+            await sut.Run(spy.Operation, CancellationToken.None);
 
             // Assert
-            for (int i = 0; i < spy.Laps.Count - 1; i++)
+            for (int i = 0; i < spy.Invocations.Count - 1; i++)
             {
-                TimeSpan actual = spy.Laps[i + 1] - spy.Laps[i];
+                TimeSpan actual = spy.Invocations[i + 1] - spy.Invocations[i];
                 TimeSpan expected = delays[i];
                 actual.Should().BeGreaterOrEqualTo(expected);
-                actual.Should().BeCloseTo(expected, precision: 20);
+                int precision =
+#if DEBUG
+                    100;
+#else
+                    20;
+#endif
+                actual.Should().BeCloseTo(expected, precision);
             }
+        }
+
+        [TestMethod]
+        [DataRow(0, true)]
+        [DataRow(1, true)]
+        [DataRow(10, true)]
+        [DataRow(0, false)]
+        [DataRow(1, false)]
+        [DataRow(10, false)]
+        public async Task RunT_invokes_operation_at_least_once(int maximumRetryCount, bool canceled)
+        {
+            // Arrange
+            TransientFaultDetectionStrategy transientFaultDetectionStrategy =
+                new DelegatingTransientFaultDetectionStrategy(exception => true);
+
+            RetryIntervalStrategy retryIntervalStrategy =
+                new DelegatingRetryIntervalStrategy(
+                    retried => TimeSpan.FromMilliseconds(1),
+                    immediateFirstRetry: false);
+
+            var sut = new RetryPolicy(
+                maximumRetryCount,
+                transientFaultDetectionStrategy,
+                retryIntervalStrategy);
+
+            var functionProvider = Mock.Of<IFunctionProvider>();
+            var arg = new Arg();
+            var cancellationToken = new CancellationToken(canceled);
+
+            // Act
+            await sut.Run(functionProvider.Func<Arg, CancellationToken, Task>, arg, cancellationToken);
+
+            // Assert
+            Mock.Get(functionProvider).Verify(x => x.Func<Arg, CancellationToken, Task>(arg, cancellationToken), Times.AtLeastOnce());
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task RunT_invokes_operation_repeatedly_until_succeeds(bool canceled)
+        {
+            // Arrange
+            var generator = new Generator<int>(new Fixture());
+            var transientFaultCount = generator.First(x => x > 0);
+            var maximumRetryCount = transientFaultCount + generator.First(x => x > 0);
+            var oper = new EventualSuccessOperator(transientFaultCount);
+            var sut = new RetryPolicy(
+                maximumRetryCount,
+                new TransientFaultDetectionStrategy(),
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
+            var arg = new Arg();
+            var cancellationToken = new CancellationToken(canceled);
+
+            // Act
+            await sut.Run(oper.Operation, arg, cancellationToken);
+
+            // Assert
+            Mock.Get(oper.FunctionProvider).Verify(x => x.Func<Arg, CancellationToken, Task>(arg, cancellationToken), Times.Exactly(transientFaultCount + 1));
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void RunT_throws_exception_if_retry_count_reaches_maximumRetryCount(bool canceled)
+        {
+            // Arrange
+            var generator = new Generator<int>(new Fixture());
+            var maximumRetryCount = generator.First(x => x > 0);
+            var transientFaultCount = maximumRetryCount + generator.First(x => x > 0);
+            Exception[] exceptions = Enumerable.Range(0, transientFaultCount).Select(_ => new Exception()).ToArray();
+            var oper = new EventualSuccessOperator(
+                transientFaultCount,
+                triedTimes => exceptions[triedTimes]);
+            var sut = new RetryPolicy(
+                maximumRetryCount,
+                new TransientFaultDetectionStrategy(),
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
+            var arg = new Arg();
+            var cancellationToken = new CancellationToken(canceled);
+
+            // Act
+            Func<Task> action = () => sut.Run(oper.Operation, arg, cancellationToken);
+
+            // Assert
+            action.ShouldThrow<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
+            Mock.Get(oper.FunctionProvider).Verify(x => x.Func<Arg, CancellationToken, Task>(arg, cancellationToken), Times.Exactly(maximumRetryCount + 1));
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void RunT_throws_exception_immediately_if_not_transient(bool canceled)
+        {
+            // Arrange
+            var exception = new Exception();
+            var maximumRetryCount = 2;
+            var oper = new EventualSuccessOperator(
+                transientFaultCount: 1,
+                transientExceptionFactory: () => exception);
+            var sut = new RetryPolicy(
+                maximumRetryCount,
+                new DelegatingTransientFaultDetectionStrategy(x => x != exception),
+                new ConstantRetryIntervalStrategy(TimeSpan.Zero));
+            var arg = new Arg();
+            var cancellationToken = new CancellationToken(canceled);
+
+            // Act
+            Func<Task> action = () => sut.Run(oper.Operation, arg, cancellationToken);
+
+            // Assert
+            action.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
+            Mock.Get(oper.FunctionProvider).Verify(x => x.Func<Arg, CancellationToken, Task>(arg, cancellationToken), Times.Once());
+        }
+
+        [TestMethod]
+        public async Task RunT_delays_before_retry()
+        {
+            // Arrange
+            var generator = new Generator<int>(new Fixture());
+            var maximumRetryCount = generator.First(x => x < 10);
+            TimeSpan[] delays = Enumerable
+                .Range(0, maximumRetryCount)
+                .Select(_ => TimeSpan.FromMilliseconds(new Fixture().Create<int>()))
+                .ToArray();
+            var spy = new EventualSuccessOperator(transientFaultCount: maximumRetryCount);
+            var sut = new RetryPolicy(
+                maximumRetryCount,
+                new TransientFaultDetectionStrategy(),
+                new DelegatingRetryIntervalStrategy(t => delays[t], false));
+
+            // Act
+            await sut.Run(spy.Operation, new Arg(), CancellationToken.None);
+
+            // Assert
+            for (int i = 0; i < spy.Invocations.Count - 1; i++)
+            {
+                TimeSpan actual = spy.Invocations[i + 1] - spy.Invocations[i];
+                TimeSpan expected = delays[i];
+                actual.Should().BeGreaterOrEqualTo(expected);
+                int precision =
+#if DEBUG
+                    100;
+#else
+                    20;
+#endif
+                actual.Should().BeCloseTo(expected, precision);
+            }
+        }
+
+        public class Arg
+        {
         }
 
         public class EventualSuccessOperator
         {
-            private readonly List<DateTime> _laps;
-            private readonly Queue<Exception> _exceptions;
+            private readonly int _transientFaultCount;
+            private readonly Func<int, Exception> _transientExceptionFactory;
+            private readonly List<DateTime> _invocations;
+            private readonly IFunctionProvider _functionProvider;
 
-            public EventualSuccessOperator(IEnumerable<Exception> exceptions)
+            public EventualSuccessOperator(int transientFaultCount, Func<int, Exception> transientExceptionFactory)
             {
-                _laps = new List<DateTime>();
-                _exceptions = new Queue<Exception>(exceptions);
+                _transientFaultCount = transientFaultCount;
+                _transientExceptionFactory = transientExceptionFactory;
+                _invocations = new List<DateTime>();
+                _functionProvider = Mock.Of<IFunctionProvider>();
             }
 
-            public IReadOnlyList<DateTime> Laps => _laps;
+            public EventualSuccessOperator(int transientFaultCount, Func<Exception> transientExceptionFactory)
+                : this(transientFaultCount, triedTimes => transientExceptionFactory.Invoke())
+            {
+            }
 
-            public Task Operation()
+            public EventualSuccessOperator(int transientFaultCount)
+                : this(transientFaultCount, triedTimes => new Exception())
+            {
+            }
+
+            public IReadOnlyList<DateTime> Invocations => _invocations;
+
+            public IFunctionProvider FunctionProvider => _functionProvider;
+
+            public async Task Operation(CancellationToken cancellationToken)
             {
                 var now = DateTime.Now;
 
                 try
                 {
-                    if (_exceptions.Any())
-                    {
-                        throw _exceptions.Dequeue();
-                    }
+                    await _functionProvider.Func<CancellationToken, Task>(cancellationToken);
 
-                    return Task.FromResult(true);
+                    int triedTimes = _invocations.Count;
+                    if (triedTimes < _transientFaultCount)
+                    {
+                        throw _transientExceptionFactory.Invoke(triedTimes);
+                    }
                 }
                 finally
                 {
-                    _laps.Add(now);
+                    _invocations.Add(now);
+                }
+            }
+
+            public async Task Operation<T>(T arg, CancellationToken cancellationToken)
+            {
+                var now = DateTime.Now;
+
+                try
+                {
+                    await _functionProvider.Func<T, CancellationToken, Task>(arg, cancellationToken);
+
+                    int triedTimes = _invocations.Count;
+                    if (triedTimes < _transientFaultCount)
+                    {
+                        throw _transientExceptionFactory.Invoke(triedTimes);
+                    }
+                }
+                finally
+                {
+                    _invocations.Add(now);
                 }
             }
         }

@@ -1,13 +1,14 @@
 ﻿namespace Khala.TransientFaultHandling
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
-    public class RetryPolicy<T>
+    public class RetryPolicy<TResult>
     {
         public RetryPolicy(
             int maximumRetryCount,
-            TransientFaultDetectionStrategy<T> transientFaultDetectionStrategy,
+            TransientFaultDetectionStrategy<TResult> transientFaultDetectionStrategy,
             RetryIntervalStrategy retryIntervalStrategy)
         {
             if (maximumRetryCount < 0)
@@ -22,15 +23,15 @@
 
         public int MaximumRetryCount { get; }
 
-        public TransientFaultDetectionStrategy<T> TransientFaultDetectionStrategy { get; }
+        public TransientFaultDetectionStrategy<TResult> TransientFaultDetectionStrategy { get; }
 
         public RetryIntervalStrategy RetryIntervalStrategy { get; }
 
-        public static RetryPolicy<T> LinearTransientDefault(int maximumRetryCount, TimeSpan increment)
+        public static RetryPolicy<TResult> LinearTransientDefault(int maximumRetryCount, TimeSpan increment)
         {
-            return new RetryPolicy<T>(
+            return new RetryPolicy<TResult>(
                 maximumRetryCount,
-                new TransientDefaultDetectionStrategy<T>(),
+                new TransientDefaultDetectionStrategy<TResult>(),
                 new LinearRetryIntervalStrategy(
                     TimeSpan.Zero,
                     increment,
@@ -38,29 +39,31 @@
                     immediateFirstRetry: false));
         }
 
-        public static RetryPolicy<T> ConstantTransientDefault(int maximumRetryCount, TimeSpan interval, bool immediateFirstRetry)
+        public static RetryPolicy<TResult> ConstantTransientDefault(int maximumRetryCount, TimeSpan interval, bool immediateFirstRetry)
         {
-            return new RetryPolicy<T>(
+            return new RetryPolicy<TResult>(
                 maximumRetryCount,
-                new TransientDefaultDetectionStrategy<T>(),
+                new TransientDefaultDetectionStrategy<TResult>(),
                 new ConstantRetryIntervalStrategy(interval, immediateFirstRetry));
         }
 
-        public virtual Task<T> Run(Func<Task<T>> operation)
+        public virtual Task<TResult> Run(
+            Func<CancellationToken, Task<TResult>> operation,
+            CancellationToken cancellationToken)
         {
             if (operation == null)
             {
                 throw new ArgumentNullException(nameof(operation));
             }
 
-            async Task<T> Run()
+            async Task<TResult> Run()
             {
                 int retryCount = 0;
-                T result = default(T);
+                TResult result = default(TResult);
                 Try:
                 try
                 {
-                    result = await operation.Invoke();
+                    result = await operation.Invoke(cancellationToken);
                 }
                 catch (Exception exception)
                 when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
@@ -82,6 +85,19 @@
             }
 
             return Run();
+        }
+
+        public virtual Task<TResult> Run<T>(
+            Func<T, CancellationToken, Task<TResult>> operation,
+            T arg,
+            CancellationToken cancellationToken)
+        {
+            if (operation == null)
+            {
+                throw new ArgumentNullException(nameof(operation));
+            }
+
+            return Run(ct => operation.Invoke(arg, ct), cancellationToken);
         }
     }
 }

@@ -87,12 +87,9 @@
     <Compile Include="TransientFaultHandling\RetryIntervalStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryPolicyT_specs.cs" />
     <Compile Include="TransientFaultHandling\RetryPolicy_specs.cs" />
-    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingActionSpyT_specs.cs" />
-    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingFuncSpy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientDefaultDetectionStrategyT_specs.cs" />
-    <Compile Include="TransientFaultHandling\Testing\TransientFaultHandlingActionSpy_specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -105,10 +102,6 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Khala.TransientFaultHandling.Testing\Khala.TransientFaultHandling.Testing.csproj">
-      <Project>{A58E0041-95F3-40DA-9511-39F5FBEFB5BF}</Project>
-      <Name>Khala.TransientFaultHandling.Testing</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Khala.TransientFaultHandling\Khala.TransientFaultHandling.csproj">
       <Project>{c9471eeb-8098-4d41-848b-5217375d4b1a}</Project>
       <Name>Khala.TransientFaultHandling</Name>
