@@ -63,7 +63,7 @@
                 Try:
                 try
                 {
-                    result = await operation.Invoke(cancellationToken);
+                    result = await operation.Invoke(cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
