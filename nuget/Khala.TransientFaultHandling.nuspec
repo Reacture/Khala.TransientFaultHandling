@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Khala.TransientFaultHandling</id>
-    <version>0.7.3</version>
+    <version>0.7.4</version>
     <title>Khala.TransientFaultHandling</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -14,8 +14,8 @@
     <copyright>Copyright Gyuwon 2017</copyright>
     <tags>Khala Retry Transient Fault</tags>
     <dependencies>
-      <group targetFramework=".NETFramework4.5" />
-      <group targetFramework=".NETStandard1.1">
+      <group targetFramework="net45" />
+      <group targetFramework="netstandard1.1">
         <dependency id="NETStandard.Library" version="1.6.0" exclude="Build,Analyzers" />
       </group>
     </dependencies>
