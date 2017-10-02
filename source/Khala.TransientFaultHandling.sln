@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.TransientFaultHandling.Tests", "Khala.TransientFaultHandling.Tests\Khala.TransientFaultHandling.Tests.csproj", "{818A1B9F-3237-479C-AE35-219E97BBD8C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.TransientFaultHandling", "Khala.TransientFaultHandling\Khala.TransientFaultHandling.csproj", "{C9471EEB-8098-4D41-848B-5217375D4B1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Khala.TransientFaultHandling", "Khala.TransientFaultHandling\Khala.TransientFaultHandling.csproj", "{5980CC78-32F3-4994-915A-EDDB538FAB6E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{818A1B9F-3237-479C-AE35-219E97BBD8C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{818A1B9F-3237-479C-AE35-219E97BBD8C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{818A1B9F-3237-479C-AE35-219E97BBD8C0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C9471EEB-8098-4D41-848B-5217375D4B1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9471EEB-8098-4D41-848B-5217375D4B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9471EEB-8098-4D41-848B-5217375D4B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9471EEB-8098-4D41-848B-5217375D4B1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5980CC78-32F3-4994-915A-EDDB538FAB6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5980CC78-32F3-4994-915A-EDDB538FAB6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5980CC78-32F3-4994-915A-EDDB538FAB6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5980CC78-32F3-4994-915A-EDDB538FAB6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

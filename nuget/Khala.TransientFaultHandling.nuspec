@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Khala.TransientFaultHandling</id>
-    <version>0.7.4</version>
+    <version>0.7.5</version>
     <title>Khala.TransientFaultHandling</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
@@ -16,11 +16,11 @@
     <dependencies>
       <group targetFramework="net45" />
       <group targetFramework="netstandard1.1">
-        <dependency id="NETStandard.Library" version="1.6.0" exclude="build,analyzers" />
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="build,analyzers" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="..\source\Khala.TransientFaultHandling\bin\Release\Khala.TransientFaultHandling.dll" target="lib\netstandard1.1\Khala.TransientFaultHandling.dll" />
+    <file src="..\source\Khala.TransientFaultHandling\bin\Release\netstandard1.1\Khala.TransientFaultHandling.dll" target="lib\netstandard1.1\Khala.TransientFaultHandling.dll" />
   </files>
 </package>
