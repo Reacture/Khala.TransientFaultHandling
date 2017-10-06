@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Khala</RootNamespace>
     <AssemblyName>Khala.TransientFaultHandling.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
@@ -30,7 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>Khala.TransientFaultHandling.Tests.ruleset</CodeAnalysisRuleSet>
-    <LangVersion>default</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -40,10 +40,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>Khala.TransientFaultHandling.Tests.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=4.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\packages\Castle.Core.4.1.1\lib\net45\Castle.Core.dll</HintPath>
+    <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Castle.Core.4.2.0\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="FluentAssertions, Version=4.19.4.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
       <HintPath>..\packages\FluentAssertions.4.19.4\lib\net45\FluentAssertions.dll</HintPath>
@@ -57,22 +58,23 @@
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\MSTest.TestFramework.1.1.18\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Moq, Version=4.7.99.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
-      <HintPath>..\packages\Moq.4.7.99\lib\net45\Moq.dll</HintPath>
+    <Reference Include="Moq, Version=4.7.137.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\packages\Moq.4.7.137\lib\net45\Moq.dll</HintPath>
     </Reference>
     <Reference Include="Ploeh.Albedo, Version=1.0.0.0, Culture=neutral, PublicKeyToken=179ef6dd03497bbd, processorArchitecture=MSIL">
       <HintPath>..\packages\Albedo.1.0.0\lib\net35\Ploeh.Albedo.dll</HintPath>
     </Reference>
-    <Reference Include="Ploeh.AutoFixture, Version=3.50.0.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoFixture.3.50.6\lib\net40\Ploeh.AutoFixture.dll</HintPath>
+    <Reference Include="Ploeh.AutoFixture, Version=3.51.0.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoFixture.3.51.0\lib\net40\Ploeh.AutoFixture.dll</HintPath>
     </Reference>
-    <Reference Include="Ploeh.AutoFixture.AutoMoq, Version=3.50.0.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoFixture.AutoMoq.3.50.6\lib\net40\Ploeh.AutoFixture.AutoMoq.dll</HintPath>
+    <Reference Include="Ploeh.AutoFixture.AutoMoq, Version=3.51.0.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoFixture.AutoMoq.3.51.0\lib\net40\Ploeh.AutoFixture.AutoMoq.dll</HintPath>
     </Reference>
-    <Reference Include="Ploeh.AutoFixture.Idioms, Version=3.50.0.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoFixture.Idioms.3.50.6\lib\net40\Ploeh.AutoFixture.Idioms.dll</HintPath>
+    <Reference Include="Ploeh.AutoFixture.Idioms, Version=3.51.0.0, Culture=neutral, PublicKeyToken=b24654c590009d4f, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoFixture.Idioms.3.51.0\lib\net40\Ploeh.AutoFixture.Idioms.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -90,6 +92,7 @@
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategyT_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientFaultDetectionStrategy_specs.cs" />
     <Compile Include="TransientFaultHandling\TransientDefaultDetectionStrategyT_specs.cs" />
+    <Compile Include="TransientFaultHandling\TransientFaultHandlingExtensions_specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -103,7 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Khala.TransientFaultHandling\Khala.TransientFaultHandling.csproj">
-      <Project>{c9471eeb-8098-4d41-848b-5217375d4b1a}</Project>
+      <Project>{5980cc78-32f3-4994-915a-eddb538fab6e}</Project>
       <Name>Khala.TransientFaultHandling</Name>
     </ProjectReference>
   </ItemGroup>
