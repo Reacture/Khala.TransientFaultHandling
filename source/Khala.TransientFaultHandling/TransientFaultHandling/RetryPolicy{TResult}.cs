@@ -4,7 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class RetryPolicy<TResult>
+    public class RetryPolicy<TResult> : IRetryPolicy<TResult>
     {
         public RetryPolicy(
             int maximumRetryCount,
@@ -47,7 +47,7 @@
                 new ConstantRetryIntervalStrategy(interval, immediateFirstRetry));
         }
 
-        public virtual Task<TResult> Run(
+        public Task<TResult> Run(
             Func<CancellationToken, Task<TResult>> operation,
             CancellationToken cancellationToken)
         {
@@ -59,7 +59,7 @@
             async Task<TResult> Run()
             {
                 int retryCount = 0;
-                TResult result = default(TResult);
+                TResult result = default;
                 Try:
                 try
                 {
@@ -87,7 +87,7 @@
             return Run();
         }
 
-        public virtual Task<TResult> Run<T>(
+        public Task<TResult> Run<T>(
             Func<T, CancellationToken, Task<TResult>> operation,
             T arg,
             CancellationToken cancellationToken)

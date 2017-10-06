@@ -4,7 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class RetryPolicy
+    public class RetryPolicy : IRetryPolicy
     {
         public RetryPolicy(
             int maximumRetryCount,
@@ -47,7 +47,7 @@
                 new ConstantRetryIntervalStrategy(interval, immediateFirstRetry));
         }
 
-        public virtual Task Run(
+        public Task Run(
             Func<CancellationToken, Task> operation,
             CancellationToken cancellationToken)
         {
@@ -76,7 +76,7 @@
             return Run();
         }
 
-        public virtual Task Run<T>(
+        public Task Run<T>(
             Func<T, CancellationToken, Task> operation,
             T arg,
             CancellationToken cancellationToken)

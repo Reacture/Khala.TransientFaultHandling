@@ -31,6 +31,12 @@
         }
 
         [TestMethod]
+        public void sut_implements_IRetryPolicy()
+        {
+            typeof(RetryPolicy).Should().Implement<IRetryPolicy>();
+        }
+
+        [TestMethod]
         public void constructor_sets_properties_correctly()
         {
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
