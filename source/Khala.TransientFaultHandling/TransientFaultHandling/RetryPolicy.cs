@@ -56,24 +56,26 @@
                 throw new ArgumentNullException(nameof(operation));
             }
 
-            async Task Run()
-            {
-                int retryCount = 0;
-                Try:
-                try
-                {
-                    await operation.Invoke(cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
-                {
-                    await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount));
-                    retryCount++;
-                    goto Try;
-                }
-            }
+            return PerformRun(operation, cancellationToken);
+        }
 
-            return Run();
+        private async Task PerformRun(
+            Func<CancellationToken, Task> operation,
+            CancellationToken cancellationToken)
+        {
+            int retryCount = 0;
+            Try:
+            try
+            {
+                await operation.Invoke(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
+            {
+                await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount));
+                retryCount++;
+                goto Try;
+            }
         }
 
         public Task Run<T>(

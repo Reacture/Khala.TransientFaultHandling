@@ -56,35 +56,37 @@
                 throw new ArgumentNullException(nameof(operation));
             }
 
-            async Task<TResult> Run()
+            return PerformRun(operation, cancellationToken);
+        }
+
+        private async Task<TResult> PerformRun(
+            Func<CancellationToken, Task<TResult>> operation,
+            CancellationToken cancellationToken)
+        {
+            int retryCount = 0;
+            TResult result = default;
+            Try:
+            try
             {
-                int retryCount = 0;
-                TResult result = default;
-                Try:
-                try
-                {
-                    result = await operation.Invoke(cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
-                {
-                    await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount));
-                    retryCount++;
-                    goto Try;
-                }
-
-                if (TransientFaultDetectionStrategy.IsTransientResult(result) &&
-                    retryCount < MaximumRetryCount)
-                {
-                    await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount));
-                    retryCount++;
-                    goto Try;
-                }
-
-                return result;
+                result = await operation.Invoke(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            when (TransientFaultDetectionStrategy.IsTransientException(exception) && retryCount < MaximumRetryCount)
+            {
+                await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount));
+                retryCount++;
+                goto Try;
             }
 
-            return Run();
+            if (TransientFaultDetectionStrategy.IsTransientResult(result) &&
+                retryCount < MaximumRetryCount)
+            {
+                await Task.Delay(RetryIntervalStrategy.GetInterval(retryCount));
+                retryCount++;
+                goto Try;
+            }
+
+            return result;
         }
 
         public Task<TResult> Run<T>(
