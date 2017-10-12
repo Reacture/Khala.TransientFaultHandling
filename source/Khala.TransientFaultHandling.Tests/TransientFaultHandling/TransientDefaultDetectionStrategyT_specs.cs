@@ -8,7 +8,7 @@
     public class TransientDefaultDetectionStrategyT_specs
     {
         [TestMethod]
-        public void sut_inherits_TransientNullDetectionStrategyT()
+        public void sut_inherits_TransientFaultDetectionStrategyT()
         {
             typeof(TransientDefaultDetectionStrategy<>)
                 .BaseType.GetGenericTypeDefinition()
