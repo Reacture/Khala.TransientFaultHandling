@@ -68,6 +68,13 @@
             actual.Should().Be(expected);
         }
 
+        [TestMethod]
+        public void modest_constructor_sets_exceptionFunc_to_true_constant_function()
+        {
+            var sut = new DelegatingTransientFaultDetectionStrategy<Result>(result => false);
+            sut.IsTransientException(new Fixture().Create<Exception>()).Should().BeTrue();
+        }
+
         public class Result
         {
         }

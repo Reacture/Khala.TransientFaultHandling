@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Khala.TransientFaultHandling</id>
-    <version>0.12.0</version>
+    <version>0.12.1</version>
     <title>Khala.TransientFaultHandling</title>
     <authors>Gyuwon</authors>
     <owners>Gyuwon</owners>
