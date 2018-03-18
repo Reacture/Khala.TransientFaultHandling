@@ -4,28 +4,18 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class RetryPolicy<TResult> : IRetryPolicy<TResult>
+    public class RetryPolicy<TResult> : RetryPolicy, IRetryPolicy, IRetryPolicy<TResult>
     {
         public RetryPolicy(
             int maximumRetryCount,
             TransientFaultDetectionStrategy<TResult> transientFaultDetectionStrategy,
             RetryIntervalStrategy retryIntervalStrategy)
+            : base(maximumRetryCount, transientFaultDetectionStrategy, retryIntervalStrategy)
         {
-            if (maximumRetryCount < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(maximumRetryCount), "Value cannot be negative.");
-            }
-
-            MaximumRetryCount = maximumRetryCount;
-            TransientFaultDetectionStrategy = transientFaultDetectionStrategy ?? throw new ArgumentNullException(nameof(transientFaultDetectionStrategy));
-            RetryIntervalStrategy = retryIntervalStrategy ?? throw new ArgumentNullException(nameof(retryIntervalStrategy));
+            TransientFaultDetectionStrategy = transientFaultDetectionStrategy;
         }
 
-        public int MaximumRetryCount { get; }
-
-        public TransientFaultDetectionStrategy<TResult> TransientFaultDetectionStrategy { get; }
-
-        public RetryIntervalStrategy RetryIntervalStrategy { get; }
+        public new TransientFaultDetectionStrategy<TResult> TransientFaultDetectionStrategy { get; }
 
         public static RetryPolicy<TResult> LinearTransientDefault(int maximumRetryCount, TimeSpan increment)
         {

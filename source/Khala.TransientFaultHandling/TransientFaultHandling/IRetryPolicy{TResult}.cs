@@ -4,7 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public interface IRetryPolicy<TResult>
+    public interface IRetryPolicy<TResult> : IRetryPolicy
     {
         Task<TResult> Run(
             Func<CancellationToken, Task<TResult>> operation,

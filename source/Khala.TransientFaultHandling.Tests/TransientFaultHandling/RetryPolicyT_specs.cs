@@ -32,6 +32,12 @@
         }
 
         [TestMethod]
+        public void sut_implements_IRetryPolicy()
+        {
+            typeof(RetryPolicy<Result>).Should().Implement<IRetryPolicy>();
+        }
+
+        [TestMethod]
         public void sut_implements_IRetryPolicy_TResult()
         {
             typeof(RetryPolicy<Result>).Should().Implement<IRetryPolicy<Result>>();
