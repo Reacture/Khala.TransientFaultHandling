@@ -6,12 +6,12 @@
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoFixture;
+    using AutoFixture.AutoMoq;
+    using AutoFixture.Idioms;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
-    using Ploeh.AutoFixture;
-    using Ploeh.AutoFixture.AutoMoq;
-    using Ploeh.AutoFixture.Idioms;
 
     [TestClass]
     public class RetryPolicyT_specs
@@ -86,7 +86,7 @@
 
             Action action = () => new RetryPolicy<Result>(maximumRetryCount, transientFaultDetectionStrategy, retryIntervalStrategy);
 
-            action.ShouldThrow<ArgumentOutOfRangeException>().Where(x => x.ParamName == "maximumRetryCount");
+            action.Should().Throw<ArgumentOutOfRangeException>().Where(x => x.ParamName == "maximumRetryCount");
         }
 
         [TestMethod]
@@ -204,7 +204,7 @@
             Func<Task> action = () => sut.Run(oper.Operation, cancellationToken);
 
             // Assert
-            action.ShouldThrow<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
+            action.Should().Throw<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
             Mock.Get(oper.FunctionProvider).Verify(x => x.Func<CancellationToken, Task<Result>>(cancellationToken), Times.Exactly(maximumRetryCount + 1));
         }
 
@@ -263,7 +263,7 @@
             Func<Task> action = () => sut.Run(oper.Operation, cancellationToken);
 
             // Assert
-            action.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
+            action.Should().Throw<Exception>().Which.Should().BeSameAs(exception);
             Mock.Get(oper.FunctionProvider).Verify(x => x.Func<CancellationToken, Task<Result>>(cancellationToken), Times.Once());
         }
 
@@ -423,7 +423,7 @@
             Func<Task> action = () => sut.Run(oper.Operation, arg, cancellationToken);
 
             // Assert
-            action.ShouldThrow<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
+            action.Should().Throw<Exception>().Which.Should().BeSameAs(exceptions[maximumRetryCount]);
             Mock.Get(oper.FunctionProvider).Verify(x => x.Func<Arg, CancellationToken, Task<Result>>(arg, cancellationToken), Times.Exactly(maximumRetryCount + 1));
         }
 
@@ -484,7 +484,7 @@
             Func<Task> action = () => sut.Run(oper.Operation, arg, cancellationToken);
 
             // Assert
-            action.ShouldThrow<Exception>().Which.Should().BeSameAs(exception);
+            action.Should().Throw<Exception>().Which.Should().BeSameAs(exception);
             Mock.Get(oper.FunctionProvider).Verify(x => x.Func<Arg, CancellationToken, Task<Result>>(arg, cancellationToken), Times.Once());
         }
 

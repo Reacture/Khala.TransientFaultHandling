@@ -2,11 +2,11 @@
 {
     using System;
     using System.Reflection;
+    using AutoFixture;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using Moq.Protected;
-    using Ploeh.AutoFixture;
 
     [TestClass]
     public class RetryIntervalStrategy_specs
@@ -106,7 +106,7 @@
         {
             var sut = new Mock<RetryIntervalStrategy>(immediateFirstRetry).Object;
             Action action = () => sut.GetInterval(-1);
-            action.ShouldThrow<ArgumentOutOfRangeException>(
+            action.Should().Throw<ArgumentOutOfRangeException>(
                 because: "negative retried is not allowed")
                 .Where(x => x.ParamName == "retried");
         }

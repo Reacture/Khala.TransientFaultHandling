@@ -1,9 +1,9 @@
 ﻿namespace Khala.TransientFaultHandling
 {
     using System;
+    using AutoFixture;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
 
     [TestClass]
     public class LinearRetryIntervalStrategy_specs

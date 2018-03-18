@@ -1,8 +1,8 @@
 ﻿namespace Khala.TransientFaultHandling
 {
+    using AutoFixture;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Ploeh.AutoFixture;
 
     [TestClass]
     public class TransientDefaultDetectionStrategyT_specs
