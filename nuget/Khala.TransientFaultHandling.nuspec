@@ -14,6 +14,7 @@
     <copyright>Copyright Gyuwon 2017</copyright>
     <tags>Khala Retry Transient Fault</tags>
     <dependencies>
+      <group targetFramework="net461" />
       <group targetFramework="netstandard1.3">
         <dependency id="NETStandard.Library" version="1.6.1" exclude="build,analyzers" />
       </group>
